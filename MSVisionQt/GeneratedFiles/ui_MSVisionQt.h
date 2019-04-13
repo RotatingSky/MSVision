@@ -814,6 +814,7 @@ public:
 
         detectBtn = new QPushButton(groupBox_10);
         detectBtn->setObjectName(QString::fromUtf8("detectBtn"));
+        detectBtn->setEnabled(false);
 
         gridLayout_6->addWidget(detectBtn, 2, 4, 1, 1);
 
@@ -1077,7 +1078,7 @@ public:
 
         retranslateUi(MSVisionQtClass);
 
-        tabWidget->setCurrentIndex(3);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MSVisionQtClass);
@@ -1162,8 +1163,8 @@ public:
         countersinkHole->setText(QApplication::translate("MSVisionQtClass", "\351\224\252\347\252\235\345\255\224", nullptr));
         detectBtn->setText(QApplication::translate("MSVisionQtClass", "\345\274\200\345\247\213\346\265\213\351\207\217", nullptr));
         groupBoxMethod->setTitle(QApplication::translate("MSVisionQtClass", "\345\217\214\347\233\256\346\265\213\351\207\217\346\226\271\346\263\225", nullptr));
-        radioButtonEpipolar->setText(QApplication::translate("MSVisionQtClass", "\346\236\201\347\272\277\345\214\271\351\205\215\346\263\225", nullptr));
-        radioButtonRebuild->setText(QApplication::translate("MSVisionQtClass", "\345\217\214\347\233\256\351\207\215\345\273\272\346\263\225", nullptr));
+        radioButtonEpipolar->setText(QApplication::translate("MSVisionQtClass", "\345\217\214\347\233\256\351\207\215\345\273\272\346\263\225", nullptr));
+        radioButtonRebuild->setText(QApplication::translate("MSVisionQtClass", "\346\236\201\347\272\277\345\214\271\351\205\215\346\263\225", nullptr));
         groupBox_19->setTitle(QApplication::translate("MSVisionQtClass", "\345\205\266\344\273\226\345\217\202\346\225\260", nullptr));
         checkBoxSharpen->setText(QApplication::translate("MSVisionQtClass", "\345\233\276\345\203\217\351\224\220\345\214\226", nullptr));
         checkBoxRestore->setText(QApplication::translate("MSVisionQtClass", "\345\233\276\345\203\217\347\246\273\347\204\246\345\244\215\345\216\237", nullptr));

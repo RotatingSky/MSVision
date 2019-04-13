@@ -14,8 +14,8 @@ namespace ms
 {
 	MSInfoCode readBinoCalibParams(
 		const std::string &fileName,
-		cv::Mat (&intrinsics)[2],
-		cv::Mat (&distCoeffs)[2],
+		cv::Mat (&intrinsics)[CamsNum],
+		cv::Mat (&distCoeffs)[CamsNum],
 		cv::Mat &R,
 		cv::Mat &t)
 	{
@@ -151,7 +151,7 @@ namespace ms
 		return MS_SUCCESS;
 	}
 
-	static void imgLinearTrans(
+	void imgLinearTrans(
 		const cv::Mat &src,
 		cv::Mat &dst,
 		float alpha,
@@ -166,7 +166,7 @@ namespace ms
 		cv::LUT(src, lut, dst);
 	}
 
-	static void imgGammaTrans(
+	void imgGammaTrans(
 		const cv::Mat &src,
 		cv::Mat &dst,
 		double fGamma)
@@ -180,7 +180,7 @@ namespace ms
 		cv::LUT(src, lut, dst);
 	}
 
-	static MSInfoCode adjustBright(
+	MSInfoCode adjustBright(
 		const cv::Mat &src,
 		cv::Mat &dst,
 		float refBright)
@@ -206,7 +206,7 @@ namespace ms
 		return MS_SUCCESS;
 	}
 
-	static float getFocusEntropy(
+	float getFocusEntropy(
 		const cv::Mat &src)
 	{
 		cv::Mat grayImg;
@@ -290,7 +290,7 @@ namespace ms
 		return focusEntropy;
 	}
 
-	static MSInfoCode zernikeDetect(
+	MSInfoCode zernikeDetect(
 		const cv::Mat &src,
 		cv::Mat &dst)
 	{
@@ -1028,7 +1028,6 @@ namespace ms
 				}
 				std::vector<cv::Point> segTemp(curve.begin() + lastIndex, curve.begin() + maxDistIndex);
 				curves.push_back(segTemp);
-				//curve.erase(curve.begin(), curve.begin() + maxDistIndex);
 				lastIndex = maxDistIndex;
 				curIndex = lastIndex + segNum;
 			}
@@ -1036,7 +1035,6 @@ namespace ms
 			{
 				std::vector<cv::Point> segTemp(curve.begin() + lastIndex, curve.begin() + curIndex);
 				curves.push_back(segTemp);
-				//curve.erase(curve.begin(), curve.begin() + curIndex);
 				lastIndex = curIndex;
 				curIndex = lastIndex + segNum;
 			}
@@ -1053,7 +1051,7 @@ namespace ms
 		}
 	}
 
-	double computeSimilarity(
+	static double computeSimilarity(
 		const std::vector<cv::Point> &arcs1,
 		const std::vector<cv::Point> &arcs2,
 		float delta,
@@ -1062,7 +1060,7 @@ namespace ms
 		std::vector<cv::Point> tempArc = arcs1;
 		tempArc.insert(tempArc.end(), arcs2.begin(), arcs2.end());
 		cv::RotatedRect rRect;
-		if (static_cast<int>(tempArc.size()) > 5)
+		if (static_cast<int>(tempArc.size()) > RansacBatch)
 		{
 			rRect = cv::fitEllipseDirect(tempArc);
 			int fitNum1 = getCompatiblePoints(arcs1, rRect, delta);
@@ -1078,7 +1076,7 @@ namespace ms
 	}
 
 	// @out-of-date
-	static void ellipticGroup(
+	/*static void ellipticGroup(
 		std::vector<std::vector<cv::Point>> &srcCurves,
 		std::vector<std::vector<cv::Point>> &dstCurves,
 		float delta,
@@ -1136,7 +1134,7 @@ namespace ms
 				dstCurves.erase(dstCurves.begin() + k);
 			}
 		}
-	}
+	}*/
 
 	static void ellipticCluster(
 		std::vector<std::vector<cv::Point>> &srcCurves,
@@ -1202,10 +1200,10 @@ namespace ms
 	}
 
 	// @out-of-date
-	MSInfoCode fitEllipse(
-		std::vector<cv::Point> points,
+	/*MSInfoCode fitEllipse(
+		const std::vector<cv::Point> &points,
 		cv::RotatedRect &rRect,
-		MSFitEllipseMethod fitMethod = FIT_ELLIPSE_DIRECT)
+		MSFitMethod fitMethod = FIT_ELLIPSE_DIRECT)
 	{
 		// Check points number of the ellipse
 		if (points.size() < 5)
@@ -1318,7 +1316,7 @@ namespace ms
 		}
 		rRect = cv::fitEllipseDirect(bestPoints);
 		return MS_SUCCESS;
-	}
+	}*/
 
 	static int updateNumIters(
 		double confidence,
@@ -1328,7 +1326,7 @@ namespace ms
 	{
 		if (batchSize <= 0)
 		{
-			batchSize = 5;
+			batchSize = RansacBatch;
 		}
 
 		confidence = MAX(confidence, 0.);
@@ -1353,13 +1351,13 @@ namespace ms
 	MSInfoCode fitEllipseRANSAC(
 		const std::vector<cv::Point> &points,
 		cv::RotatedRect &rRect,
-		float threshold,
+		float delta,
 		double confidence = 0.995,
 		int maxIters = 1000,
-		MSFitEllipseMethod fitMethod = FIT_ELLIPSE_DIRECT)
+		MSFitMethod fitMethod = FIT_ELLIPSE_DIRECT)
 	{
 		// Too few points return error.
-		if (static_cast<int>(points.size()) < 5)
+		if (static_cast<int>(points.size()) < RansacBatch)
 		{
 			return MS_FIT_ELLIPSE_ERROR;
 		}
@@ -1376,7 +1374,7 @@ namespace ms
 		// Pk = q^m
 		// q = In / N
 		int numIters = maxIters;
-		int batchSize = 5;
+		int batchSize = RansacBatch;
 		int pointsNum = static_cast<int>(points.size());
 		size_t maxCoNum = 0;
 		std::vector<int> bestIndexes;
@@ -1411,7 +1409,7 @@ namespace ms
 			}
 			// Compute number of compatible points.
 			std::vector<int> coIndexes;
-			getCompatiblePoints(points, tempRect, coIndexes, threshold);
+			getCompatiblePoints(points, tempRect, coIndexes, delta);
 			if (coIndexes.size() > maxCoNum)
 			{
 				maxCoNum = coIndexes.size();
@@ -1425,7 +1423,7 @@ namespace ms
 		}
 
 		// Get the final result.
-		if (bestIndexes.size() < 5)
+		if (bestIndexes.size() < RansacBatch)
 		{
 			return MS_FIT_ELLIPSE_ERROR;
 		}
@@ -1439,7 +1437,7 @@ namespace ms
 	}
 
 	// @out-of-date
-	static void getDistances(
+	/*static void getDistances(
 		const cv::RotatedRect &rRect,
 		std::vector<cv::Point> points,
 		std::vector<float> &distances)
@@ -1458,10 +1456,10 @@ namespace ms
 			float distance = pow(x / a, 2) + pow(y / b, 2) - 1;
 			distances.push_back(distance);
 		}
-	}
+	}*/
 
 	// @out-of-date
-	static void kMeansEllipse(
+	/*static void kMeansEllipse(
 		const std::vector<cv::Point> &points,
 		std::vector<int> &labels,
 		cv::RotatedRect rRect,
@@ -1510,15 +1508,15 @@ namespace ms
 			center[0] = countNum[0] == 0 ? center[0] : sumD[0] / countNum[0];
 			center[1] = countNum[1] == 0 ? center[1] : sumD[1] / countNum[1];
 		}
-	}
+	}*/
 
 	// @out-of-date
-	static MSInfoCode getEllipse(
+	/*static MSInfoCode getEllipse(
 		cv::Mat src,
 		std::vector<cv::RotatedRect> &rRectSet,
 		int curveNum,
 		int contourSize,
-		MSFitEllipseMethod fitMethod = FIT_ELLIPSE_RANSAC)
+		MSFitMethod fitMethod = FIT_ELLIPSE_RANSAC)
 	{
 		// Grab contours from the edge image
 		std::vector<std::vector<cv::Point>> contours;
@@ -1663,18 +1661,18 @@ namespace ms
 		}
 
 		return MS_SUCCESS;
-	}
+	}*/
 
 	MSInfoCode grabEllipse(
 		const cv::Mat &src,
 		std::vector<cv::RotatedRect> &rRects,
 		float delta,
-		int curveNum,
-		int segNum,
-		int curveSize,
-		double angleThreshold,
-		double distThreshold,
-		MSFitEllipseMethod fitMethod)
+		int curveNum = 2,
+		int segNum = 10,
+		int curveSize = 20,
+		double angleThreshold = 15.0,
+		double distThreshold = 4.0,
+		MSFitMethod fitMethod = FIT_ELLIPSE_DIRECT)
 	{
 		// Trace all edges
 		std::vector<std::vector<cv::Point>> edges;
@@ -1762,7 +1760,7 @@ namespace ms
 				}
 			}
 			cv::RotatedRect tempRect;
-			if (static_cast<int>(contours[bestIndex].size()) > 5)
+			if (static_cast<int>(contours[bestIndex].size()) > RansacBatch)
 			{
 				switch (fitMethod)
 				{
@@ -1771,7 +1769,7 @@ namespace ms
 				case FIT_ELLIPSE_AMS:
 					tempRect = cv::fitEllipseAMS(contours[bestIndex]); break;
 				case FIT_ELLIPSE_RANSAC:
-					fitEllipse(contours[bestIndex], tempRect, FIT_ELLIPSE_DIRECT); break;
+					fitEllipseRANSAC(contours[bestIndex], tempRect, delta); break;
 				case FIT_ELLIPSE_DIRECT:
 				default:
 					tempRect = cv::fitEllipseDirect(contours[bestIndex]); break;
@@ -1804,18 +1802,17 @@ namespace ms
 			rRects[i] = rRects[maxIndex];
 			rRects[maxIndex] = tempRect;
 		}
-
 		return MS_SUCCESS;
 	}
 
 	MSInfoCode pyrEllipse(
 		const cv::Mat &src,
 		std::vector<cv::RotatedRect> &rRects,
-		int curveNum,
-		int layerNum,
-		int kernelSize,
-		int segNum,
-		float distThreshold)
+		int curveNum = 2,
+		int layerNum = 4,
+		int kernelSize = 3,
+		int segNum = 10,
+		float distThreshold = 2.f)
 	{
 		// Check parameters
 		if (src.empty())
@@ -1962,24 +1959,7 @@ namespace ms
 				float b = temprRects[k].size.width / 2;
 				cv::Mat tempImg = roiEdges[l];
 				getCompatiblePoints(tempImg, temprRects[k], curves[k], rangeThreshold);
-				/*for (int i = 0; i < tempImg.rows; i++)
-				{
-					uchar* data = tempImg.ptr<uchar>(i);
-					for (int j = 0; j < tempImg.cols; j++)
-					{
-						if (data[j] > 128)
-						{
-							float x = (j - temprRects[k].center.x) * sinA - (i - temprRects[k].center.y) * cosA;
-							float y = (j - temprRects[k].center.x) * cosA + (i - temprRects[k].center.y) * sinA;
-							float distance = pow(x / a, 2) + pow(y / b, 2) - 1;
-							if (abs(distance) < rangeThreshold)
-							{
-								curves[k].push_back(cv::Point(j, i));
-							}
-						}
-					}
-				}*/
-				if (curves[k].size() > 4)
+				if (static_cast<int>(curves[k].size()) > RansacBatch)
 				{
 					cv::RotatedRect rRect = cv::fitEllipseDirect(curves[k]);
 					temprRects[k] = rRect;
@@ -2009,9 +1989,9 @@ namespace ms
 	}
 
 	static void selectPoints(
-		cv::RotatedRect rRect,
+		const cv::RotatedRect &rRect,
 		std::vector<cv::Point2f> &points,
-		int pointNum)
+		int pointNum = 53)
 	{
 		float cosA = (float)cos(rRect.angle / 180 * CV_PI);
 		float sinA = (float)sin(rRect.angle / 180 * CV_PI);
@@ -2031,10 +2011,10 @@ namespace ms
 	}
 
 	static void getTarPoint(
-		cv::RotatedRect refRect,
-		cv::RotatedRect tarRect,
-		cv::Vec3f lineCoeff,
-		cv::Point2f refPoint,
+		const cv::RotatedRect &refRect,
+		const cv::RotatedRect &tarRect,
+		const cv::Vec3f &lineCoeff,
+		const cv::Point2f &refPoint,
 		cv::Point2f &tarPoint)
 	{
 		// Compute theta0 of reference point
@@ -2136,10 +2116,10 @@ namespace ms
 	}
 
 	static void computeF(
-		cv::Mat Al,
-		cv::Mat Ar,
-		cv::Mat R,
-		cv::Mat t,
+		const cv::Mat &Al,
+		const cv::Mat &Ar,
+		const cv::Mat &R,
+		const cv::Mat &t,
 		cv::Mat &F)
 	{
 		// E = R * S
@@ -2153,12 +2133,11 @@ namespace ms
 	}
 
 	static void computeXYZ(
-		cv::Point pl,
-		cv::Point pr,
-		cv::Mat Al,
-		cv::Mat Ar,
-		cv::Mat R,
-		cv::Mat t,
+		const cv::Point &pl,
+		const cv::Point &pr,
+		const cv::Mat (&intrinsics)[CamsNum],
+		const cv::Mat &R,
+		const cv::Mat &t,
 		cv::Point3d &xyzl,
 		cv::Point3d &xyzr)
 	{
@@ -2168,6 +2147,8 @@ namespace ms
 		// zs = [zl, zr]'
 		// A * zs = v1
 		// zs = (A' * A) \ A' * b
+		cv::Mat Al = intrinsics[0];
+		cv::Mat Ar = intrinsics[1];
 		cv::Mat v0(3, 1, CV_32FC1);
 		cv::Mat v1(3, 1, CV_32FC1);
 		cv::Mat Pl = (cv::Mat_<double>(3, 1) << pl.x, pl.y, 1);
@@ -2191,8 +2172,8 @@ namespace ms
 	}
 
 	static void fitPlane(
-		std::vector<cv::Point3d> points,
-		cv::Vec4d& planeCoeff)
+		const std::vector<cv::Point3d> &points,
+		cv::Vec4d &planeCoeff)
 	{
 		// A * x + B * y + C * z + D = 0
 		// M * [A, B, C, D]' = 0
@@ -2236,8 +2217,8 @@ namespace ms
 	}
 
 	static void computeCenterDiameter(
-		std::vector<cv::Point3d> points,
-		cv::Vec4d plane,
+		const std::vector<cv::Point3d> &points,
+		const cv::Vec4d &plane,
 		cv::Point3d &center,
 		double &diameter)
 	{
@@ -2275,7 +2256,7 @@ namespace ms
 		}
 
 		// Get coordinate of hole center
-		if (holePoints.size() > 4)
+		if (static_cast<int>(holePoints.size()) > 4)
 		{
 			cv::RotatedRect holeRect = fitEllipse(holePoints);
 			diameter = (holeRect.size.height + holeRect.size.width) / 2;
@@ -2297,14 +2278,14 @@ namespace ms
 	}
 
 	void getCenterDiameter(
-		cv::RotatedRect rRects[],
-		cv::Vec4d planes[],
-		cv::Point3d xyzs[],
+		const std::vector<cv::RotatedRect> &rRects,
+		const cv::Mat (&intrinsics)[CamsNum],
+		const cv::Mat &R,
+		const cv::Mat &t,
+		cv::Vec4d (&planes)[CamsNum],
+		cv::Point3d (&xyzs)[CamsNum],
 		double &diameter,
-		int pointsNum,
-		cv::Mat intrinsics[],
-		cv::Mat R,
-		cv::Mat t)
+		int pointsNum = 53)
 	{
 		// Compute fundamental matrix
 		cv::Mat F;
@@ -2336,7 +2317,7 @@ namespace ms
 		{
 			cv::Point3d xyzl;
 			cv::Point3d xyzr;
-			computeXYZ(pointsL[i], pointsR[i], intrinsics[0], intrinsics[1], R, t, xyzl, xyzr);
+			computeXYZ(pointsL[i], pointsR[i], intrinsics, R, t, xyzl, xyzr);
 			points3DL.push_back(xyzl);
 			points3DR.push_back(xyzr);
 		}
@@ -2349,8 +2330,8 @@ namespace ms
 	}
 
 	void getDeltaDeep(
-		cv::Vec4d plane1,
-		cv::Vec4d plane2,
+		const cv::Vec4d &plane1,
+		const cv::Vec4d &plane2,
 		double d1,
 		double d2,
 		double theta,
@@ -2362,17 +2343,17 @@ namespace ms
 		delta = acos(n1n2) * 180 / CV_PI;
 
 		// Compute deep of the hole
-		theta = theta / 360 * CV_PI;
+		theta = theta / 180 * CV_PI;
 		if (d2 < d1)
 		{
 			std::swap(d1, d2);
 		}
-		deep = (d2 - d1) / (2 * tan(theta));
+		deep = (d2 - d1) / (2 * tan(theta / 2));
 	}
 
 	void getVerticalityDepth(
-		const cv::Mat(&R1)[2],
-		const cv::Mat(&t1)[2],
+		const cv::Mat (&R1)[2],
+		const cv::Mat (&t1)[2],
 		double &verticality,
 		double &depth)
 	{
@@ -2390,14 +2371,14 @@ namespace ms
 
 	void conicReconstruction(
 		const std::vector<cv::RotatedRect> &rRects,
-		const cv::Mat(&intrinsics)[2],
+		const cv::Mat (&intrinsics)[CamsNum],
 		const cv::Mat &R,
 		const cv::Mat &t,
 		cv::Mat &R1,
 		cv::Mat &t1,
 		double &d,
 		double &E,
-		cv::Point3d(&xyz)[2])
+		cv::Point3d (&xyz)[CamsNum])
 	{
 		// Reference: S.D.Ma, Conics-Based Stereo, Motion Estimation, and Pose Determination
 		// Compute Q of 2 ellipses in the images
@@ -2545,8 +2526,8 @@ namespace ms
 
 	MSInfoCode saveHoleParameters(
 		const std::string& fileName,
-		cv::Point3d center[][2],
-		double diameter[],
+		cv::Point3d center[2][CamsNum],
+		double diameter[2],
 		double verticality,
 		double depth)
 	{

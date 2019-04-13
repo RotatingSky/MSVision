@@ -1,10 +1,16 @@
-#pragma execution_character_set("utf-8")
+/**
+ * Realization of MSVision Qt Application.
+ * @filename:	MSVisionQt.cpp
+ * @author:		Sny
+ * @version:	1.0
+ * @since:		2018-12-22
+ */
 
+#pragma execution_character_set("utf-8")
 
 #include "stdafx.h"
 #include "MSVisionQt.h"
 #include "LightControl.h"
-
 
 MSVisionQt::MSVisionQt(QWidget *parent)
 	: QMainWindow(parent),
@@ -24,7 +30,7 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 	showFlag(0),
 	lightChannel(CHANNEL1),
 	mvHoleType(CountersinkHole),
-	fitMethod(FIT_ELLIPSE_DIRECT),
+	fitMethod(ms::FIT_ELLIPSE_DIRECT),
 	scope(0.75f),
 	pointsNum(53),
 	bitAngle(100.0)
@@ -60,7 +66,7 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 	measureRadBtns->addButton(ui.radioButtonRebuild, 1);
 
 	// Initialize variables
-	for (int i = 0; i < CAM_NUM; i++)
+	for (int i = 0; i < ms::CamsNum; i++)
 	{
 		mvCamHandles[i] = NULL;
 		mvProperties[i] = NULL;
@@ -95,7 +101,7 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 
 MSVisionQt::~MSVisionQt()
 {
-	for (int i = 0; i < CAM_NUM; i++)
+	for (int i = 0; i < ms::CamsNum; i++)
 	{
 		MVCamProptySheetDestroy(mvProperties[i]);
 	}
@@ -131,9 +137,9 @@ void MSVisionQt::initCam()
 	if (mvInitLibFlag)
 	{
 		MVGetNumOfCameras(&numCam);
-		if (numCam == CAM_NUM)
+		if (numCam == ms::CamsNum)
 		{
-			for (int i = 0; i < CAM_NUM; i++)
+			for (int i = 0; i < ms::CamsNum; i++)
 			{
 				MVGetCameraInfo(i, &mvCamInfos[i]);
 			}
@@ -183,7 +189,7 @@ void MSVisionQt::drawImgs(int index)
 		hImg = ui.scrollAreaL->height();
 	}
 	// Draw images in labels
-	QImage showImgs[CAM_NUM];
+	QImage showImgs[ms::CamsNum];
 	if (index == 0)
 	{
 		showImgs[0] = qtImgs[0].scaled(wImg, hImg, Qt::KeepAspectRatio);
@@ -258,7 +264,7 @@ QImage MSVisionQt::cvMat2qImage(cv::Mat matImg)
 	return qtImg;
 }
 
-MSInfoCode MSVisionQt::detectImg(int index)
+ms::MSInfoCode MSVisionQt::detectImg(int index)
 {
 	// Parameters for detection
 	int rRectsNum = 0;
@@ -307,9 +313,9 @@ MSInfoCode MSVisionQt::detectImg(int index)
 		tempImg = roiImg.clone();
 	}
 	// Grab ellipses from image and draw
-	MSInfoCode status;
+	ms::MSInfoCode status;
 	status = ms::pyrEllipse(tempImg, rRects[index], rRectsNum, 4, 3, 10, 2.f);
-	if (status != MS_SUCCESS)
+	if (status != ms::MS_SUCCESS)
 	{
 		return status;
 	}
@@ -327,7 +333,7 @@ MSInfoCode MSVisionQt::detectImg(int index)
 		rRects[index][i].center.x += roiRect.x;
 		rRects[index][i].center.y += roiRect.y;
 	}
-	return MS_SUCCESS;
+	return ms::MS_SUCCESS;
 }
 
 void MSVisionQt::measure()
@@ -335,43 +341,47 @@ void MSVisionQt::measure()
 	// Calculate centers and diameters of the hole
 	if (mvHoleType == CountersinkHole)
 	{
-		/*
-		cv::Point3d xyzs[2][CAM_NUM];
-		cv::RotatedRect tempRects[CAM_NUM];
-		cv::Vec4d planes[2][CAM_NUM];
+		cv::Point3d xyzs[2][ms::CamsNum];
 		double diameters[2];
-		for (int k = 0; k < 2; k++)
-		{
-			tempRects[0] = rRects[0][k];
-			tempRects[1] = rRects[1][k];
-			getCenterDiameter(tempRects, planes[k], xyzs[k], diameters[k], pointsNum, intrinsics, R, t);
-		}
-		// Calculate delta and deep of the hole
-		double deltas[2];
-		double deeps[2];
-		getDeltaDeep(planes[0][0], planes[1][0], diameters[0], diameters[1], bitAngle, deltas[0], deeps[0]);
-		getDeltaDeep(planes[0][1], planes[1][1], diameters[0], diameters[1], bitAngle, deltas[1], deeps[1]);
-		double delta = (deltas[0] + deltas[1]) / 2;
-		double deep = (deeps[0] + deeps[1]) / 2;
-		*/
-		// Reconstruct the ellipses
-		cv::Point3d xyzs[2][CAM_NUM];
-		std::vector<cv::RotatedRect> tempRects(2);
-		cv::Mat R1[2];
-		cv::Mat t1[2];
-		double diameters[2];
-		double E[2];
-		for (int k = 0; k < 2; k++)
-		{
-			tempRects[0] = rRects[0][k];
-			tempRects[1] = rRects[1][k];
-			ms::conicReconstruction(tempRects, intrinsics, R, t, R1[k], t1[k], diameters[k], E[k], xyzs[k]);
-		}
-		// Calculate verticality and depth of the hole
 		double delta = 0;
 		double deep = 0;
-		ms::getVerticalityDepth(R1, t1, delta, deep);
-		delta *= 180 / CV_PI;
+		if (measureType == Reconstruction)
+		{
+			// Reconstruct the ellipses
+			std::vector<cv::RotatedRect> tempRects(ms::CamsNum);
+			cv::Mat R1[2];
+			cv::Mat t1[2];
+			double E[2];
+			for (int k = 0; k < 2; k++)
+			{
+				tempRects[0] = rRects[0][k];
+				tempRects[1] = rRects[1][k];
+				ms::conicReconstruction(tempRects, intrinsics, R, t, R1[k], t1[k], diameters[k], E[k], xyzs[k]);
+			}
+			// Calculate verticality and depth of the hole
+			ms::getVerticalityDepth(R1, t1, delta, deep);
+			delta *= 180 / CV_PI;
+		}
+		else if (measureType == EpipolarMatching)
+		{
+			// Epipolar method for measurement
+			std::vector<cv::RotatedRect> tempRects(ms::CamsNum);
+			cv::Vec4d planes[2][ms::CamsNum];
+			for (int k = 0; k < 2; k++)
+			{
+				tempRects[0] = rRects[0][k];
+				tempRects[1] = rRects[1][k];
+				ms::getCenterDiameter(tempRects, intrinsics, R, t, planes[k], xyzs[k], diameters[k], pointsNum);
+			}
+			// Calculate delta and deep of the hole
+			double deltas[2];
+			double deeps[2];
+			ms::getDeltaDeep(planes[0][0], planes[1][0], diameters[0], diameters[1], bitAngle, deltas[0], deeps[0]);
+			ms::getDeltaDeep(planes[0][1], planes[1][1], diameters[0], diameters[1], bitAngle, deltas[1], deeps[1]);
+			delta = (deltas[0] + deltas[1]) / 2;
+			deep = (deeps[0] + deeps[1]) / 2;
+		}
+
 		// Display result
 		QString xyzStrOuterC1 = "[" +
 			QString::number(xyzs[0][0].x, 10, 3) + "," +
@@ -404,22 +414,29 @@ void MSVisionQt::measure()
 	}
 	else if (mvHoleType == StraightHole)
 	{
-		/*cv::Point3d xyzs[CAM_NUM];
-		cv::RotatedRect tempRects[CAM_NUM];
-		cv::Vec4d planes[CAM_NUM];
+		cv::Point3d xyzs[ms::CamsNum];
 		double diameter;
-		tempRects[0] = rRects[0][0];
-		tempRects[1] = rRects[1][0];
-		getCenterDiameter(tempRects, planes, xyzs, diameter, pointsNum, intrinsics, R, t);*/
-		cv::Point3d xyzs[CAM_NUM];
-		std::vector<cv::RotatedRect> tempRects(2);
-		cv::Mat R1;
-		cv::Mat t1;
-		double diameter;
-		double E;
-		tempRects[0] = rRects[0][0];
-		tempRects[1] = rRects[1][0];
-		ms::conicReconstruction(tempRects, intrinsics, R, t, R1, t1, diameter, E, xyzs);
+		if (measureType == Reconstruction)
+		{
+			std::vector<cv::RotatedRect> tempRects(2);
+			cv::Mat R1;
+			cv::Mat t1;
+			double E;
+			tempRects[0] = rRects[0][0];
+			tempRects[1] = rRects[1][0];
+			ms::conicReconstruction(tempRects, intrinsics, R, t, R1, t1, diameter, E, xyzs);
+		}
+		else if (measureType == EpipolarMatching)
+		{
+			cv::Point3d xyzs[ms::CamsNum];
+			std::vector<cv::RotatedRect> tempRects(ms::CamsNum);
+			cv::Vec4d planes[ms::CamsNum];
+			double diameter;
+			tempRects[0] = rRects[0][0];
+			tempRects[1] = rRects[1][0];
+			ms::getCenterDiameter(tempRects, intrinsics, R, t, planes, xyzs, diameter, pointsNum);
+		}
+		
 		// Display results
 		QString xyzStrC1 = "[" +
 			QString::number(xyzs[0].x, 10, 3) + "," +
@@ -445,7 +462,7 @@ void MSVisionQt::on_linkCam()
 	}
 	if (!linkedFlag)
 	{
-		for (int i = 0; i < CAM_NUM; i++)
+		for (int i = 0; i < ms::CamsNum; i++)
 		{
 			switch (MVOpenCamByIndex(i, &mvCamHandles[i]))
 			{
@@ -479,7 +496,7 @@ void MSVisionQt::on_linkCam()
 				std::string proptyTitle = "Propty C" + std::to_string(i + 1);
 				MVCamProptySheetInit(&mvProperties[i], mvCamHandles[i], 0, LPCTSTR(proptyTitle.c_str()));
 				linkedNumCam++;
-				if (linkedNumCam == CAM_NUM - 1)
+				if (linkedNumCam == ms::CamsNum - 1)
 				{
 					linkedFlag = true;
 					ui.linkBtn->setText(u8"¶Ï¿ªÁ¬½Ó");
@@ -491,7 +508,7 @@ void MSVisionQt::on_linkCam()
 	else
 	{
 		on_stopCam();
-		for (int i = 0; i < CAM_NUM; i++)
+		for (int i = 0; i < ms::CamsNum; i++)
 		{
 			if (mvCamHandles[i] != NULL)
 			{
@@ -563,6 +580,7 @@ void MSVisionQt::on_startCam()
 {
 	ui.stopSampleBtn->setEnabled(true);
 	ui.saveBtn->setEnabled(true);
+	ui.detectBtn->setEnabled(true);
 	// Start grabbing images
 	if (numCam == 2)
 	{
@@ -579,8 +597,9 @@ void MSVisionQt::on_stopCam()
 {
 	ui.stopSampleBtn->setDisabled(true);
 	ui.saveBtn->setDisabled(true);
+	ui.detectBtn->setDisabled(true);
 	// Stop grabbing images
-	for (int i = 0; i < CAM_NUM; i++)
+	for (int i = 0; i < ms::CamsNum; i++)
 	{
 		MVStopGrab(mvCamHandles[i]);
 	}
@@ -752,9 +771,9 @@ void MSVisionQt::on_fitMethod(int index)
 {
 	switch (index)
 	{
-	case 0: fitMethod = FIT_ELLIPSE_AMS;
-	case 1: fitMethod = FIT_ELLIPSE_DIRECT;
-	case 2: fitMethod = FIT_ELLIPSE_RANSAC;
+	case 0: fitMethod = ms::FIT_ELLIPSE_AMS;
+	case 1: fitMethod = ms::FIT_ELLIPSE_DIRECT;
+	case 2: fitMethod = ms::FIT_ELLIPSE_RANSAC;
 	}
 }
 
@@ -762,8 +781,8 @@ void MSVisionQt::on_measureType(int index)
 {
 	switch (index)
 	{
-	case 0: measureType = EpipolarMatching;
-	case 1: measureType = Reconstruction;
+	case 0: measureType = Reconstruction;
+	case 1: measureType = EpipolarMatching;
 	}
 }
 
@@ -802,22 +821,23 @@ void MSVisionQt::on_detect()
 
 	// Measure the hole
 	sTime = (double)cv::getTickCount();
-	MSInfoCode status;
-	for (int i = 0; i < CAM_NUM; i++)
+	ms::MSInfoCode status;
+	for (int i = 0; i < ms::CamsNum; i++)
 	{
 		status = detectImg(i);
-		if (status != MS_SUCCESS)
+		if (status != ms::MS_SUCCESS)
 		{
 			switch (status)
 			{
-			case MS_ARGUMENT_ERROR: WARNMSG("Argument error"); break;
-			case MS_OPEN_FILE_ERROR: WARNMSG("Open .xml file error"); break;
-			case MS_SAVE_FIEL_ERROR: WARNMSG("Save .xml file error"); break;
-			case MS_FIT_ELLIPSE_ERROR: WARNMSG("Fit ellipse error"); break;
-			case MS_GET_ELLIPSE_ERROR: WARNMSG("Get ellipse error"); break;
-			case MS_PYR_ELLIPSE_ERROR: WARNMSG("Pyramid method error"); break;
-			case MS_ROI_SIZE_ERROR: WARNMSG("ROI size error"); break;
-			case MS_IMG_TYPE_ERROR: WARNMSG("Image type error"); break;
+			case ms::MS_ARGUMENT_ERROR: WARNMSG("Argument error"); break;
+			case ms::MS_OPEN_FILE_ERROR: WARNMSG("Open .xml file error"); break;
+			case ms::MS_SAVE_FIEL_ERROR: WARNMSG("Save .xml file error"); break;
+			case ms::MS_FIT_ELLIPSE_ERROR: WARNMSG("Fit ellipse error"); break;
+			case ms::MS_GET_ELLIPSE_ERROR: WARNMSG("Get ellipse error"); break;
+			case ms::MS_PYR_ELLIPSE_ERROR: WARNMSG("Pyramid method error"); break;
+			case ms::MS_ROI_SIZE_ERROR: WARNMSG("ROI size error"); break;
+			case ms::MS_IMG_TYPE_ERROR: WARNMSG("Image type error"); break;
+			case ms::MS_DIVIDE_ZERO_ERROR: WARNMSG("Denominator is 0 error"); break;
 			}
 			return;
 		}

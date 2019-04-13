@@ -1,13 +1,12 @@
 /**
- * MSVision Qt Application.
+ * Header for MSVision Qt Application.
+ * @filename:	MSVisionQt.h
  * @author:		Sny
  * @version:	1.0
  * @since:		2018-12-22
  */
 
-
 #pragma once
-
 
 // Standard and Windows library
 #include <iostream>
@@ -32,18 +31,14 @@
 #include "MVImage.h"
 #include "MVCamProptySheet.h"
 
-
-#define	CAM_NUM			2
 #define WARNINGS		("ERROR")
 #define INFORMATION		("INFORMATION")
 #define INFOMSG(str)	QMessageBox::information(this, INFORMATION, (str), QMessageBox::Ok);
 #define WARNMSG(str)	QMessageBox::warning(this, WARNINGS, (str), QMessageBox::Ok);
 
-
 namespace Ui {
 	class MSVisionQt;
 }
-
 
 class MSVisionQt : public QMainWindow
 {
@@ -54,7 +49,7 @@ public:
 	~MSVisionQt();
 	int onStreamCB(MV_IMAGE_INFO *, int);
 	enum HoleType { StraightHole = 0, CountersinkHole };
-	enum MeasureType { EpipolarMatching = 0, Reconstruction };
+	enum MeasureType { Reconstruction = 0, EpipolarMatching };
 
 public slots:
 	// For controlling camera
@@ -88,7 +83,7 @@ protected:
 	void drawImgs(int);
 	cv::Mat qImage2cvMat(QImage qtImg);
 	QImage cvMat2qImage(cv::Mat matImg);
-	MSInfoCode detectImg(int);
+	ms::MSInfoCode detectImg(int);
 	void measure();
 
 private:
@@ -98,13 +93,13 @@ private:
 	int numCam;
 	int linkedNumCam;
 	int imgScale;
-	HANDLE mvCamHandles[CAM_NUM];
-	HANDLE mvProperties[CAM_NUM];
-	MVCamInfo mvCamInfos[CAM_NUM];
-	MV_PixelFormatEnums mvPixelFormats[CAM_NUM];
-	MVImage mvImgs[CAM_NUM];
-	QImage qtImgs[CAM_NUM];
-	QImage showQtImgs[CAM_NUM];
+	HANDLE mvCamHandles[ms::CamsNum];
+	HANDLE mvProperties[ms::CamsNum];
+	MVCamInfo mvCamInfos[ms::CamsNum];
+	MV_PixelFormatEnums mvPixelFormats[ms::CamsNum];
+	MVImage mvImgs[ms::CamsNum];
+	QImage qtImgs[ms::CamsNum];
+	QImage showQtImgs[ms::CamsNum];
 	QString saveImgPath;
 	bool mvInitLibFlag;
 	bool linkedFlag;
@@ -119,14 +114,14 @@ private:
 	QButtonGroup *holeTypeRadBtns;
 	QButtonGroup *fitMethodRadBtns;
 	QButtonGroup *measureRadBtns;
-	cv::Mat intrinsics[CAM_NUM];
-	cv::Mat distCoeffs[CAM_NUM];
+	cv::Mat intrinsics[ms::CamsNum];
+	cv::Mat distCoeffs[ms::CamsNum];
 	cv::Mat R;
 	cv::Mat t;
 	HoleType mvHoleType;
-	MSFitEllipseMethod fitMethod;
+	ms::MSFitMethod fitMethod;
 	MeasureType measureType;
-	std::vector<cv::RotatedRect> rRects[CAM_NUM];
+	std::vector<cv::RotatedRect> rRects[ms::CamsNum];
 	float scope;
 	int pointsNum;
 	double bitAngle;

@@ -234,7 +234,7 @@
      <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_1">
         <attribute name="title">
@@ -886,6 +886,9 @@
             </item>
             <item row="2" column="4">
              <widget class="QPushButton" name="detectBtn">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>开始测量</string>
               </property>
@@ -900,7 +903,7 @@
                <item>
                 <widget class="QRadioButton" name="radioButtonEpipolar">
                  <property name="text">
-                  <string>极线匹配法</string>
+                  <string>双目重建法</string>
                  </property>
                  <property name="checked">
                   <bool>true</bool>
@@ -910,7 +913,7 @@
                <item>
                 <widget class="QRadioButton" name="radioButtonRebuild">
                  <property name="text">
-                  <string>双目重建法</string>
+                  <string>极线匹配法</string>
                  </property>
                 </widget>
                </item>

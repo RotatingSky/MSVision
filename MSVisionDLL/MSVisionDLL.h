@@ -29,42 +29,55 @@ namespace ms
 	/**
 	 * Read binocular cameras calibration parameters.
 	 * @params
-	 *		fileName	- input XML file
-	 *		intrinsics	- intrinsic paramters
-	 *		distCoeffs	- distort coefficients
+	 *		fileName	- input XML file of calibration
+	 *		intrinsics	- intrinsic paramters of cameras
+	 *		distCoeffs	- distort coefficients of cameras
 	 *		R			- rotation matrix of binocular vision
 	 *		t			- translation vector of binocular vision
 	 * @return
+	 *		MSInfoCode	- state of the code
 	 */
 	EXPORT_API MSInfoCode readBinoCalibParams(
 		const std::string &fileName,
-		cv::Mat (&intrinsics)[2],
-		cv::Mat (&distCoeffs)[2],
+		cv::Mat (&intrinsics)[CamsNum],
+		cv::Mat (&distCoeffs)[CamsNum],
 		cv::Mat &R,
 		cv::Mat &t);
 
 	/**
 	 * Fit ellipse by RANSAC method.
 	 * @params
-	 *		points
-	 *		rRect
-	 *		fitMethod
+	 *		points		- input points for fitting ellipse
+	 *		rRect		- output RotatedRect of the ellipse
+	 *		delta		- threshold for finding compatible points
+	 *		confidence	- confidence for RANSAC method
+	 *		maxIters	- maximum iteration times of sampling
+	 *		fitMethod	- interial fitting method
 	 * @return
+	 *		MSInfoCode	- state of the code
 	 */
-	EXPORT_API MSInfoCode fitEllipse(
-		std::vector<cv::Point> points,
+	EXPORT_API MSInfoCode fitEllipseRANSAC(
+		const std::vector<cv::Point> &points,
 		cv::RotatedRect &rRect,
-		MSFitEllipseMethod fitMethod);
+		float delta,
+		double confidence,
+		int maxIters,
+		MSFitMethod fitMethod);
 
 	/**
 	 * Get ellipses from a gray image.
 	 * @params
-	 *		src
-	 *		rRects
-	 *		curveNum
-	 *		curveSize
-	 *		delta
+	 *		src				- input gray image
+	 *		rRects			- output RotatedRect set of ellipses
+	 *		delta			- threshold for finding compatible points
+	 *		curveNum		- ellipses' number to grab
+	 *		segNum			- points number of a segment
+	 *		curveSize		- threshold of curve size
+	 *		angleThreshold	- threshold of curvature angle
+	 *		distThreshold	- threshold of neighbor distance
+	 *		fitMethod		- interial fitting method
 	 * @return
+	 *		MSInfoCode	- state of the code
 	 */
 	EXPORT_API MSInfoCode grabEllipse(
 		const cv::Mat &src,
@@ -73,67 +86,72 @@ namespace ms
 		int curveNum,
 		int segNum,
 		int curveSize,
-		double angleThreshold = 15.0,
-		double distThreshold = 4.0,
-		MSFitEllipseMethod fitMethod = FIT_ELLIPSE_DIRECT);
+		double angleThreshold,
+		double distThreshold,
+		MSFitMethod fitMethod);
 
 	/**
 	 * Gaussian Pyramid method for grabbing ellipses.
 	 * @params
-	 *		src
-	 *		rRects
-	 *		curveNum
-	 *		layerNum
-	 *		distThreshold
+	 *		src				- input image
+	 *		rRects			- output RotatedRect set of ellipses
+	 *		curveNum		- ellipses' number
+	 *		layerNum		- layers number
+	 *		kernelSize		- size of Gaussian filter kernel
+	 *		segNum			- points number of a segment
+	 *		distThreshold	- threshold of neighbor distance
 	 * @return
+	 *		MSInfoCode	- state of the code
 	 */
 	EXPORT_API MSInfoCode pyrEllipse(
 		const cv::Mat &src,
 		std::vector<cv::RotatedRect> &rRects,
-		int curveNum = 2,
-		int layerNum = 4,
-		int kernelSize = 3,
-		int segNum = 10,
-		float distThreshold = 2.f);
+		int curveNum,
+		int layerNum,
+		int kernelSize,
+		int segNum,
+		float distThreshold);
 
 	/**
 	 * Get the center and diameter of the hole.
 	 * @params
-	 *		rRects
-	 *		planes
-	 *		xyzs
-	 *		diameters
-	 *		pointsNum
-	 *		intrinsics
-	 *		R
-	 *		t
+	 *		rRects		- output RotatedRect set of ellipses
+	 *		intrinsics	- intrinsic paramters of cameras
+	 *		R			- rotation matrix of binocular vision
+	 *		t			- translation vector of binocular vision
+	 *		planes		- planes of ellipses
+	 *		xyzs		- coordinates of center in 2 cameras
+	 *		diameter	- diameter of the hole
+	 *		pointsNum	- points number for matching
 	 * @return
+	 *		void
 	 */
 	EXPORT_API void getCenterDiameter(
-		cv::RotatedRect rRects[],
-		cv::Vec4d planes[],
-		cv::Point3d xyzs[],
+		const std::vector<cv::RotatedRect> &rRects,
+		const cv::Mat (&intrinsics)[CamsNum],
+		const cv::Mat &R,
+		const cv::Mat &t,
+		cv::Vec4d (&planes)[CamsNum],
+		cv::Point3d (&xyzs)[CamsNum],
 		double &diameter,
-		int pointsNum,
-		cv::Mat intrinsics[],
-		cv::Mat R,
-		cv::Mat t);
+		int pointsNum);
 
 	/**
 	 * Get the delta angle and deep of the hole.
 	 * @params
-	 *		plane1
-	 *		plane2
-	 *		d1
-	 *		d2
-	 *		theta
-	 *		delta
-	 *		deep
+	 *		plane1	- plane of ellipse 1
+	 *		plane2	- plane of ellipse 2
+	 *		d1		- diameter of ellipse 1
+	 *		d2		- diameter of ellipse 2
+	 *		theta	- angle of the drilling bit
+	 *		delta	- verticality of the hole
+	 *		deep	- depth of the hole
 	 * @return
+	 *		void
 	 */
 	EXPORT_API void getDeltaDeep(
-		cv::Vec4d plane1,
-		cv::Vec4d plane2,
+		const cv::Vec4d &plane1,
+		const cv::Vec4d &plane2,
 		double d1,
 		double d2,
 		double theta,
@@ -144,11 +162,12 @@ namespace ms
 	 * @Override
 	 *		Get the delta angle and deep of the hole.
 	 * @params
-	 *		R1
-	 *		t1
-	 *		delta
-	 *		deep
+	 *		R1		- rotation matries of camera 1
+	 *		t1		- translation vectors of camera 1
+	 *		delta	- verticality of the hole
+	 *		deep	- depth of the hole
 	 * @return
+	 *		void
 	 */
 	EXPORT_API void getVerticalityDepth(
 		const cv::Mat(&R1)[2],
@@ -159,42 +178,44 @@ namespace ms
 	/**
 	 * Reconstruction an ellipse from 2 images.
 	 * @params
-	 *		rects
-	 *		R1
-	 *		t1
-	 *		d
-	 *		E
-	 *		xyz
-	 *		intrinsics
-	 *		R
-	 *		t
+	 *		rRects		- output RotatedRect set of ellipses
+	 *		intrinsics	- intrinsic paramters of cameras
+	 *		R			- rotation matrix of binocular vision
+	 *		t			- translation vector of binocular vision
+	 *		R1			- rotation matrix of camera 1
+	 *		t1			- translation vector of camera 1
+	 *		d			- diameter of the ellipse
+	 *		E			- error value of reconstruction
+	 *		xyz			- coordinate of hole center
 	 * @return
+	 *		void
 	 */
 	EXPORT_API void conicReconstruction(
 		const std::vector<cv::RotatedRect> &rRects,
-		const cv::Mat(&intrinsics)[2],
+		const cv::Mat(&intrinsics)[CamsNum],
 		const cv::Mat &R,
 		const cv::Mat &t,
 		cv::Mat &R1,
 		cv::Mat &t1,
 		double &d,
 		double &E,
-		cv::Point3d(&xyz)[2]);
+		cv::Point3d(&xyz)[CamsNum]);
 
 	/**
 	 * Save the result of detecting
 	 * @params
-	 *		fileName
-	 *		center
-	 *		diameter
-	 *		delta
-	 *		deep
+	 *		fileName	- input XML file of calibration
+	 *		center		- centers of ellipses for 2 cameras
+	 *		diameter	- diameters of ellipses
+	 *		delta		- verticality of the hole
+	 *		deep		- depth of the hole
 	 * @return
+	 *		MSInfoCode	- state of the code
 	 */
 	EXPORT_API MSInfoCode saveHoleParameters(
 		const std::string &fileName,
-		cv::Point3d center[][2],
-		double diameter[],
+		cv::Point3d center[2][CamsNum],
+		double diameter[2],
 		double delta,
 		double deep);
 } // namespace ms
