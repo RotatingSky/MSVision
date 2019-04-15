@@ -31,7 +31,6 @@
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
-#include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
@@ -61,13 +60,11 @@ public:
     QMenu *menu_V;
     QMenu *menu_T;
     QMenu *menu_H;
-    QToolBar *mainToolBar;
-    QStatusBar *statusBar;
     QDockWidget *dockWidget;
     QWidget *dockWidgetContents;
     QVBoxLayout *verticalLayout;
     QTabWidget *tabWidget;
-    QWidget *tab_1;
+    QWidget *tab_cameras;
     QVBoxLayout *verticalLayout_2;
     QGridLayout *gridLayout;
     QPushButton *saveBtn;
@@ -91,7 +88,7 @@ public:
     QVBoxLayout *verticalLayout_5;
     QPushButton *proptyC1Btn;
     QSpacerItem *verticalSpacer;
-    QWidget *tab_2;
+    QWidget *tab_light;
     QVBoxLayout *verticalLayout_7;
     QGroupBox *groupBox_5;
     QVBoxLayout *verticalLayout_8;
@@ -132,50 +129,51 @@ public:
     QPushButton *pushButton_12;
     QPushButton *pushButton_13;
     QSpacerItem *verticalSpacer_2;
-    QWidget *tab_3;
+    QWidget *tab_calibration;
     QVBoxLayout *verticalLayout_11;
     QGroupBox *groupBox_12;
     QGroupBox *groupBox_13;
     QGroupBox *groupBox_14;
-    QWidget *tab_4;
+    QWidget *tab_measure;
     QVBoxLayout *verticalLayout_10;
-    QGroupBox *groupBox_10;
-    QGridLayout *gridLayout_6;
+    QGroupBox *groupBox_15;
+    QVBoxLayout *verticalLayout_21;
+    QHBoxLayout *horizontalLayout_21;
+    QVBoxLayout *verticalLayout_23;
+    QHBoxLayout *horizontalLayout_23;
     QPushButton *loadDataBtn;
+    QHBoxLayout *horizontalLayout_22;
+    QPushButton *detectBtn;
+    QGroupBox *groupBox_16;
+    QVBoxLayout *verticalLayout_17;
+    QHBoxLayout *horizontalLayout_19;
+    QLabel *label_18;
+    QSpinBox *spinKernelSize;
+    QHBoxLayout *horizontalLayout_20;
+    QLabel *label_19;
+    QDoubleSpinBox *doubleSpinBilateral;
+    QVBoxLayout *verticalLayout_24;
+    QGroupBox *groupBoxHoleType;
+    QVBoxLayout *verticalLayout_13;
+    QRadioButton *straightHole;
+    QRadioButton *countersinkHole;
     QGroupBox *groupBoxFit;
     QVBoxLayout *verticalLayout_18;
     QRadioButton *radioButtonAMS;
     QRadioButton *radioButtonB2AC;
     QRadioButton *radioButtonRANSAC;
-    QGroupBox *groupBox_16;
-    QVBoxLayout *verticalLayout_17;
-    QHBoxLayout *horizontalLayout_19;
-    QLabel *label_18;
-    QSpinBox *spinBox;
-    QHBoxLayout *horizontalLayout_20;
-    QLabel *label_19;
-    QDoubleSpinBox *doubleSpinBox;
-    QGroupBox *groupBoxHoleType;
-    QVBoxLayout *verticalLayout_13;
-    QRadioButton *straightHole;
-    QRadioButton *countersinkHole;
-    QPushButton *detectBtn;
-    QGroupBox *groupBoxMethod;
-    QVBoxLayout *verticalLayout_14;
-    QRadioButton *radioButtonEpipolar;
-    QRadioButton *radioButtonRebuild;
+    QVBoxLayout *verticalLayout_25;
     QGroupBox *groupBox_19;
     QVBoxLayout *verticalLayout_19;
     QCheckBox *checkBoxSharpen;
     QCheckBox *checkBoxRestore;
-    QGroupBox *groupBox_11;
-    QGridLayout *gridLayout_5;
-    QHBoxLayout *horizontalLayout_6;
-    QLabel *label_8;
-    QLineEdit *outerDiameter;
-    QHBoxLayout *horizontalLayout_8;
-    QLabel *label_16;
-    QLineEdit *delta;
+    QGroupBox *groupBoxMethod;
+    QVBoxLayout *verticalLayout_14;
+    QRadioButton *radioButtonRebuild;
+    QRadioButton *radioButtonEpipolar;
+    QGroupBox *groupBox_10;
+    QVBoxLayout *verticalLayout_26;
+    QHBoxLayout *horizontalLayout_25;
     QGroupBox *groupBox_20;
     QVBoxLayout *verticalLayout_16;
     QHBoxLayout *horizontalLayout_2;
@@ -184,12 +182,6 @@ public:
     QHBoxLayout *horizontalLayout_3;
     QLabel *label_3;
     QLineEdit *centerInnerC1;
-    QHBoxLayout *horizontalLayout_15;
-    QLabel *label_9;
-    QLineEdit *innerDiameter;
-    QHBoxLayout *horizontalLayout_16;
-    QLabel *label_17;
-    QLineEdit *deep;
     QGroupBox *groupBox_21;
     QVBoxLayout *verticalLayout_15;
     QHBoxLayout *horizontalLayout_4;
@@ -198,16 +190,31 @@ public:
     QHBoxLayout *horizontalLayout_5;
     QLabel *label_5;
     QLineEdit *centerInnerC2;
+    QGroupBox *groupBox_11;
+    QGridLayout *gridLayout_5;
+    QHBoxLayout *horizontalLayout_15;
+    QLabel *label_9;
+    QLineEdit *innerDiameter;
+    QHBoxLayout *horizontalLayout_6;
+    QLabel *label_8;
+    QLineEdit *outerDiameter;
+    QHBoxLayout *horizontalLayout_8;
+    QLabel *label_16;
+    QLineEdit *delta;
+    QHBoxLayout *horizontalLayout_16;
+    QLabel *label_17;
+    QLineEdit *deep;
     QHBoxLayout *horizontalLayout_13;
     QLabel *label_20;
     QLineEdit *timeUsed;
     QSpacerItem *verticalSpacer_3;
+    QStatusBar *statusBar;
 
     void setupUi(QMainWindow *MSVisionQtClass)
     {
         if (MSVisionQtClass->objectName().isEmpty())
             MSVisionQtClass->setObjectName(QString::fromUtf8("MSVisionQtClass"));
-        MSVisionQtClass->resize(1467, 700);
+        MSVisionQtClass->resize(1300, 577);
         QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -267,7 +274,7 @@ public:
         scrollAreaL->setWidgetResizable(true);
         scrollAreaWidgetContentsL = new QWidget();
         scrollAreaWidgetContentsL->setObjectName(QString::fromUtf8("scrollAreaWidgetContentsL"));
-        scrollAreaWidgetContentsL->setGeometry(QRect(0, 0, 408, 591));
+        scrollAreaWidgetContentsL->setGeometry(QRect(0, 0, 352, 480));
         sizePolicy.setHeightForWidth(scrollAreaWidgetContentsL->sizePolicy().hasHeightForWidth());
         scrollAreaWidgetContentsL->setSizePolicy(sizePolicy);
         horizontalLayoutImgL = new QHBoxLayout(scrollAreaWidgetContentsL);
@@ -287,7 +294,7 @@ public:
         scrollAreaR->setWidgetResizable(true);
         scrollAreaWidgetContentsR = new QWidget();
         scrollAreaWidgetContentsR->setObjectName(QString::fromUtf8("scrollAreaWidgetContentsR"));
-        scrollAreaWidgetContentsR->setGeometry(QRect(0, 0, 408, 591));
+        scrollAreaWidgetContentsR->setGeometry(QRect(0, 0, 352, 480));
         sizePolicy.setHeightForWidth(scrollAreaWidgetContentsR->sizePolicy().hasHeightForWidth());
         scrollAreaWidgetContentsR->setSizePolicy(sizePolicy);
         horizontalLayoutImgR = new QHBoxLayout(scrollAreaWidgetContentsR);
@@ -309,7 +316,7 @@ public:
         MSVisionQtClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MSVisionQtClass);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1467, 23));
+        menuBar->setGeometry(QRect(0, 0, 1300, 23));
         menu_F = new QMenu(menuBar);
         menu_F->setObjectName(QString::fromUtf8("menu_F"));
         menu_V = new QMenu(menuBar);
@@ -319,15 +326,11 @@ public:
         menu_H = new QMenu(menuBar);
         menu_H->setObjectName(QString::fromUtf8("menu_H"));
         MSVisionQtClass->setMenuBar(menuBar);
-        mainToolBar = new QToolBar(MSVisionQtClass);
-        mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
-        MSVisionQtClass->addToolBar(Qt::TopToolBarArea, mainToolBar);
-        statusBar = new QStatusBar(MSVisionQtClass);
-        statusBar->setObjectName(QString::fromUtf8("statusBar"));
-        MSVisionQtClass->setStatusBar(statusBar);
         dockWidget = new QDockWidget(MSVisionQtClass);
         dockWidget->setObjectName(QString::fromUtf8("dockWidget"));
-        dockWidget->setMinimumSize(QSize(615, 639));
+        sizePolicy.setHeightForWidth(dockWidget->sizePolicy().hasHeightForWidth());
+        dockWidget->setSizePolicy(sizePolicy);
+        dockWidget->setMinimumSize(QSize(560, 532));
         dockWidgetContents = new QWidget();
         dockWidgetContents->setObjectName(QString::fromUtf8("dockWidgetContents"));
         verticalLayout = new QVBoxLayout(dockWidgetContents);
@@ -336,35 +339,37 @@ public:
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         tabWidget = new QTabWidget(dockWidgetContents);
         tabWidget->setObjectName(QString::fromUtf8("tabWidget"));
-        tab_1 = new QWidget();
-        tab_1->setObjectName(QString::fromUtf8("tab_1"));
-        verticalLayout_2 = new QVBoxLayout(tab_1);
+        sizePolicy.setHeightForWidth(tabWidget->sizePolicy().hasHeightForWidth());
+        tabWidget->setSizePolicy(sizePolicy);
+        tab_cameras = new QWidget();
+        tab_cameras->setObjectName(QString::fromUtf8("tab_cameras"));
+        verticalLayout_2 = new QVBoxLayout(tab_cameras);
         verticalLayout_2->setSpacing(6);
         verticalLayout_2->setContentsMargins(11, 11, 11, 11);
         verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
         gridLayout = new QGridLayout();
         gridLayout->setSpacing(6);
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-        saveBtn = new QPushButton(tab_1);
+        saveBtn = new QPushButton(tab_cameras);
         saveBtn->setObjectName(QString::fromUtf8("saveBtn"));
         saveBtn->setEnabled(false);
 
         gridLayout->addWidget(saveBtn, 0, 3, 1, 1);
 
-        stopSampleBtn = new QPushButton(tab_1);
+        stopSampleBtn = new QPushButton(tab_cameras);
         stopSampleBtn->setObjectName(QString::fromUtf8("stopSampleBtn"));
         stopSampleBtn->setEnabled(false);
 
         gridLayout->addWidget(stopSampleBtn, 0, 2, 1, 1);
 
-        sampleBtn = new QPushButton(tab_1);
+        sampleBtn = new QPushButton(tab_cameras);
         sampleBtn->setObjectName(QString::fromUtf8("sampleBtn"));
         sampleBtn->setEnabled(false);
         sampleBtn->setCheckable(false);
 
         gridLayout->addWidget(sampleBtn, 0, 1, 1, 1);
 
-        linkBtn = new QPushButton(tab_1);
+        linkBtn = new QPushButton(tab_cameras);
         linkBtn->setObjectName(QString::fromUtf8("linkBtn"));
 
         gridLayout->addWidget(linkBtn, 0, 0, 1, 1);
@@ -372,7 +377,7 @@ public:
 
         verticalLayout_2->addLayout(gridLayout);
 
-        groupBox_2 = new QGroupBox(tab_1);
+        groupBox_2 = new QGroupBox(tab_cameras);
         groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
         horizontalLayout_7 = new QHBoxLayout(groupBox_2);
         horizontalLayout_7->setSpacing(6);
@@ -388,6 +393,11 @@ public:
 
         camInfoC1 = new QLineEdit(groupBox_2);
         camInfoC1->setObjectName(QString::fromUtf8("camInfoC1"));
+        QSizePolicy sizePolicy2(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(camInfoC1->sizePolicy().hasHeightForWidth());
+        camInfoC1->setSizePolicy(sizePolicy2);
         camInfoC1->setReadOnly(true);
 
         verticalLayout_3->addWidget(camInfoC1);
@@ -405,6 +415,8 @@ public:
 
         camInfoC2 = new QLineEdit(groupBox_2);
         camInfoC2->setObjectName(QString::fromUtf8("camInfoC2"));
+        sizePolicy2.setHeightForWidth(camInfoC2->sizePolicy().hasHeightForWidth());
+        camInfoC2->setSizePolicy(sizePolicy2);
         camInfoC2->setReadOnly(true);
 
         verticalLayout_4->addWidget(camInfoC2);
@@ -415,7 +427,7 @@ public:
 
         verticalLayout_2->addWidget(groupBox_2);
 
-        groupBox = new QGroupBox(tab_1);
+        groupBox = new QGroupBox(tab_cameras);
         groupBox->setObjectName(QString::fromUtf8("groupBox"));
         gridLayout_2 = new QGridLayout(groupBox);
         gridLayout_2->setSpacing(6);
@@ -429,6 +441,7 @@ public:
         verticalLayout_6->setObjectName(QString::fromUtf8("verticalLayout_6"));
         proptyC2Btn = new QPushButton(groupBox_4);
         proptyC2Btn->setObjectName(QString::fromUtf8("proptyC2Btn"));
+        proptyC2Btn->setEnabled(false);
 
         verticalLayout_6->addWidget(proptyC2Btn);
 
@@ -443,6 +456,7 @@ public:
         verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
         proptyC1Btn = new QPushButton(groupBox_3);
         proptyC1Btn->setObjectName(QString::fromUtf8("proptyC1Btn"));
+        proptyC1Btn->setEnabled(false);
 
         verticalLayout_5->addWidget(proptyC1Btn);
 
@@ -456,14 +470,14 @@ public:
 
         verticalLayout_2->addItem(verticalSpacer);
 
-        tabWidget->addTab(tab_1, QString());
-        tab_2 = new QWidget();
-        tab_2->setObjectName(QString::fromUtf8("tab_2"));
-        verticalLayout_7 = new QVBoxLayout(tab_2);
+        tabWidget->addTab(tab_cameras, QString());
+        tab_light = new QWidget();
+        tab_light->setObjectName(QString::fromUtf8("tab_light"));
+        verticalLayout_7 = new QVBoxLayout(tab_light);
         verticalLayout_7->setSpacing(6);
         verticalLayout_7->setContentsMargins(11, 11, 11, 11);
         verticalLayout_7->setObjectName(QString::fromUtf8("verticalLayout_7"));
-        groupBox_5 = new QGroupBox(tab_2);
+        groupBox_5 = new QGroupBox(tab_light);
         groupBox_5->setObjectName(QString::fromUtf8("groupBox_5"));
         verticalLayout_8 = new QVBoxLayout(groupBox_5);
         verticalLayout_8->setSpacing(6);
@@ -504,7 +518,7 @@ public:
 
         verticalLayout_7->addWidget(groupBox_5);
 
-        groupBox_6 = new QGroupBox(tab_2);
+        groupBox_6 = new QGroupBox(tab_light);
         groupBox_6->setObjectName(QString::fromUtf8("groupBox_6"));
         verticalLayout_9 = new QVBoxLayout(groupBox_6);
         verticalLayout_9->setSpacing(6);
@@ -570,7 +584,7 @@ public:
 
         verticalLayout_7->addWidget(groupBox_6);
 
-        groupBox_7 = new QGroupBox(tab_2);
+        groupBox_7 = new QGroupBox(tab_light);
         groupBox_7->setObjectName(QString::fromUtf8("groupBox_7"));
         horizontalLayout_12 = new QHBoxLayout(groupBox_7);
         horizontalLayout_12->setSpacing(6);
@@ -594,7 +608,7 @@ public:
 
         verticalLayout_7->addWidget(groupBox_7);
 
-        groupBox_8 = new QGroupBox(tab_2);
+        groupBox_8 = new QGroupBox(tab_light);
         groupBox_8->setObjectName(QString::fromUtf8("groupBox_8"));
         gridLayout_3 = new QGridLayout(groupBox_8);
         gridLayout_3->setSpacing(6);
@@ -629,7 +643,7 @@ public:
 
         verticalLayout_7->addWidget(groupBox_8);
 
-        groupBox_9 = new QGroupBox(tab_2);
+        groupBox_9 = new QGroupBox(tab_light);
         groupBox_9->setObjectName(QString::fromUtf8("groupBox_9"));
         gridLayout_4 = new QGridLayout(groupBox_9);
         gridLayout_4->setSpacing(6);
@@ -677,74 +691,77 @@ public:
 
         verticalLayout_7->addItem(verticalSpacer_2);
 
-        tabWidget->addTab(tab_2, QString());
-        tab_3 = new QWidget();
-        tab_3->setObjectName(QString::fromUtf8("tab_3"));
-        verticalLayout_11 = new QVBoxLayout(tab_3);
+        tabWidget->addTab(tab_light, QString());
+        tab_calibration = new QWidget();
+        tab_calibration->setObjectName(QString::fromUtf8("tab_calibration"));
+        verticalLayout_11 = new QVBoxLayout(tab_calibration);
         verticalLayout_11->setSpacing(6);
         verticalLayout_11->setContentsMargins(11, 11, 11, 11);
         verticalLayout_11->setObjectName(QString::fromUtf8("verticalLayout_11"));
-        groupBox_12 = new QGroupBox(tab_3);
+        groupBox_12 = new QGroupBox(tab_calibration);
         groupBox_12->setObjectName(QString::fromUtf8("groupBox_12"));
 
         verticalLayout_11->addWidget(groupBox_12);
 
-        groupBox_13 = new QGroupBox(tab_3);
+        groupBox_13 = new QGroupBox(tab_calibration);
         groupBox_13->setObjectName(QString::fromUtf8("groupBox_13"));
 
         verticalLayout_11->addWidget(groupBox_13);
 
-        groupBox_14 = new QGroupBox(tab_3);
+        groupBox_14 = new QGroupBox(tab_calibration);
         groupBox_14->setObjectName(QString::fromUtf8("groupBox_14"));
 
         verticalLayout_11->addWidget(groupBox_14);
 
-        tabWidget->addTab(tab_3, QString());
-        tab_4 = new QWidget();
-        tab_4->setObjectName(QString::fromUtf8("tab_4"));
-        verticalLayout_10 = new QVBoxLayout(tab_4);
+        tabWidget->addTab(tab_calibration, QString());
+        tab_measure = new QWidget();
+        tab_measure->setObjectName(QString::fromUtf8("tab_measure"));
+        verticalLayout_10 = new QVBoxLayout(tab_measure);
         verticalLayout_10->setSpacing(6);
         verticalLayout_10->setContentsMargins(11, 11, 11, 11);
         verticalLayout_10->setObjectName(QString::fromUtf8("verticalLayout_10"));
-        groupBox_10 = new QGroupBox(tab_4);
-        groupBox_10->setObjectName(QString::fromUtf8("groupBox_10"));
-        gridLayout_6 = new QGridLayout(groupBox_10);
-        gridLayout_6->setSpacing(6);
-        gridLayout_6->setContentsMargins(11, 11, 11, 11);
-        gridLayout_6->setObjectName(QString::fromUtf8("gridLayout_6"));
-        loadDataBtn = new QPushButton(groupBox_10);
+        groupBox_15 = new QGroupBox(tab_measure);
+        groupBox_15->setObjectName(QString::fromUtf8("groupBox_15"));
+        verticalLayout_21 = new QVBoxLayout(groupBox_15);
+        verticalLayout_21->setSpacing(6);
+        verticalLayout_21->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_21->setObjectName(QString::fromUtf8("verticalLayout_21"));
+        horizontalLayout_21 = new QHBoxLayout();
+        horizontalLayout_21->setSpacing(6);
+        horizontalLayout_21->setObjectName(QString::fromUtf8("horizontalLayout_21"));
+        verticalLayout_23 = new QVBoxLayout();
+        verticalLayout_23->setSpacing(6);
+        verticalLayout_23->setObjectName(QString::fromUtf8("verticalLayout_23"));
+        horizontalLayout_23 = new QHBoxLayout();
+        horizontalLayout_23->setSpacing(6);
+        horizontalLayout_23->setObjectName(QString::fromUtf8("horizontalLayout_23"));
+        loadDataBtn = new QPushButton(groupBox_15);
         loadDataBtn->setObjectName(QString::fromUtf8("loadDataBtn"));
-        loadDataBtn->setMaximumSize(QSize(100, 16777215));
+        loadDataBtn->setMaximumSize(QSize(16777215, 16777215));
 
-        gridLayout_6->addWidget(loadDataBtn, 0, 0, 1, 1);
-
-        groupBoxFit = new QGroupBox(groupBox_10);
-        groupBoxFit->setObjectName(QString::fromUtf8("groupBoxFit"));
-        verticalLayout_18 = new QVBoxLayout(groupBoxFit);
-        verticalLayout_18->setSpacing(6);
-        verticalLayout_18->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_18->setObjectName(QString::fromUtf8("verticalLayout_18"));
-        radioButtonAMS = new QRadioButton(groupBoxFit);
-        radioButtonAMS->setObjectName(QString::fromUtf8("radioButtonAMS"));
-
-        verticalLayout_18->addWidget(radioButtonAMS);
-
-        radioButtonB2AC = new QRadioButton(groupBoxFit);
-        radioButtonB2AC->setObjectName(QString::fromUtf8("radioButtonB2AC"));
-        radioButtonB2AC->setChecked(false);
-
-        verticalLayout_18->addWidget(radioButtonB2AC);
-
-        radioButtonRANSAC = new QRadioButton(groupBoxFit);
-        radioButtonRANSAC->setObjectName(QString::fromUtf8("radioButtonRANSAC"));
-        radioButtonRANSAC->setChecked(true);
-
-        verticalLayout_18->addWidget(radioButtonRANSAC);
+        horizontalLayout_23->addWidget(loadDataBtn);
 
 
-        gridLayout_6->addWidget(groupBoxFit, 1, 1, 1, 1);
+        verticalLayout_23->addLayout(horizontalLayout_23);
 
-        groupBox_16 = new QGroupBox(groupBox_10);
+        horizontalLayout_22 = new QHBoxLayout();
+        horizontalLayout_22->setSpacing(6);
+        horizontalLayout_22->setObjectName(QString::fromUtf8("horizontalLayout_22"));
+        detectBtn = new QPushButton(groupBox_15);
+        detectBtn->setObjectName(QString::fromUtf8("detectBtn"));
+        detectBtn->setEnabled(false);
+        QSizePolicy sizePolicy3(QSizePolicy::Minimum, QSizePolicy::Fixed);
+        sizePolicy3.setHorizontalStretch(0);
+        sizePolicy3.setVerticalStretch(0);
+        sizePolicy3.setHeightForWidth(detectBtn->sizePolicy().hasHeightForWidth());
+        detectBtn->setSizePolicy(sizePolicy3);
+
+        horizontalLayout_22->addWidget(detectBtn);
+
+
+        verticalLayout_23->addLayout(horizontalLayout_22);
+
+        groupBox_16 = new QGroupBox(groupBox_15);
         groupBox_16->setObjectName(QString::fromUtf8("groupBox_16"));
         verticalLayout_17 = new QVBoxLayout(groupBox_16);
         verticalLayout_17->setSpacing(6);
@@ -758,15 +775,15 @@ public:
 
         horizontalLayout_19->addWidget(label_18);
 
-        spinBox = new QSpinBox(groupBox_16);
-        spinBox->setObjectName(QString::fromUtf8("spinBox"));
-        spinBox->setMaximumSize(QSize(50, 16777215));
-        spinBox->setMinimum(1);
-        spinBox->setMaximum(99);
-        spinBox->setSingleStep(2);
-        spinBox->setValue(3);
+        spinKernelSize = new QSpinBox(groupBox_16);
+        spinKernelSize->setObjectName(QString::fromUtf8("spinKernelSize"));
+        spinKernelSize->setMaximumSize(QSize(50, 16777215));
+        spinKernelSize->setMinimum(1);
+        spinKernelSize->setMaximum(99);
+        spinKernelSize->setSingleStep(2);
+        spinKernelSize->setValue(3);
 
-        horizontalLayout_19->addWidget(spinBox);
+        horizontalLayout_19->addWidget(spinKernelSize);
 
 
         verticalLayout_17->addLayout(horizontalLayout_19);
@@ -779,20 +796,26 @@ public:
 
         horizontalLayout_20->addWidget(label_19);
 
-        doubleSpinBox = new QDoubleSpinBox(groupBox_16);
-        doubleSpinBox->setObjectName(QString::fromUtf8("doubleSpinBox"));
-        doubleSpinBox->setMaximumSize(QSize(50, 16777215));
-        doubleSpinBox->setValue(1.000000000000000);
+        doubleSpinBilateral = new QDoubleSpinBox(groupBox_16);
+        doubleSpinBilateral->setObjectName(QString::fromUtf8("doubleSpinBilateral"));
+        doubleSpinBilateral->setMaximumSize(QSize(50, 16777215));
+        doubleSpinBilateral->setValue(1.000000000000000);
 
-        horizontalLayout_20->addWidget(doubleSpinBox);
+        horizontalLayout_20->addWidget(doubleSpinBilateral);
 
 
         verticalLayout_17->addLayout(horizontalLayout_20);
 
 
-        gridLayout_6->addWidget(groupBox_16, 1, 0, 1, 1);
+        verticalLayout_23->addWidget(groupBox_16);
 
-        groupBoxHoleType = new QGroupBox(groupBox_10);
+
+        horizontalLayout_21->addLayout(verticalLayout_23);
+
+        verticalLayout_24 = new QVBoxLayout();
+        verticalLayout_24->setSpacing(6);
+        verticalLayout_24->setObjectName(QString::fromUtf8("verticalLayout_24"));
+        groupBoxHoleType = new QGroupBox(groupBox_15);
         groupBoxHoleType->setObjectName(QString::fromUtf8("groupBoxHoleType"));
         verticalLayout_13 = new QVBoxLayout(groupBoxHoleType);
         verticalLayout_13->setSpacing(6);
@@ -800,6 +823,7 @@ public:
         verticalLayout_13->setObjectName(QString::fromUtf8("verticalLayout_13"));
         straightHole = new QRadioButton(groupBoxHoleType);
         straightHole->setObjectName(QString::fromUtf8("straightHole"));
+        straightHole->setCheckable(false);
 
         verticalLayout_13->addWidget(straightHole);
 
@@ -810,35 +834,41 @@ public:
         verticalLayout_13->addWidget(countersinkHole);
 
 
-        gridLayout_6->addWidget(groupBoxHoleType, 0, 1, 1, 1);
+        verticalLayout_24->addWidget(groupBoxHoleType);
 
-        detectBtn = new QPushButton(groupBox_10);
-        detectBtn->setObjectName(QString::fromUtf8("detectBtn"));
-        detectBtn->setEnabled(false);
+        groupBoxFit = new QGroupBox(groupBox_15);
+        groupBoxFit->setObjectName(QString::fromUtf8("groupBoxFit"));
+        verticalLayout_18 = new QVBoxLayout(groupBoxFit);
+        verticalLayout_18->setSpacing(6);
+        verticalLayout_18->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_18->setObjectName(QString::fromUtf8("verticalLayout_18"));
+        radioButtonAMS = new QRadioButton(groupBoxFit);
+        radioButtonAMS->setObjectName(QString::fromUtf8("radioButtonAMS"));
 
-        gridLayout_6->addWidget(detectBtn, 2, 4, 1, 1);
+        verticalLayout_18->addWidget(radioButtonAMS);
 
-        groupBoxMethod = new QGroupBox(groupBox_10);
-        groupBoxMethod->setObjectName(QString::fromUtf8("groupBoxMethod"));
-        verticalLayout_14 = new QVBoxLayout(groupBoxMethod);
-        verticalLayout_14->setSpacing(6);
-        verticalLayout_14->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_14->setObjectName(QString::fromUtf8("verticalLayout_14"));
-        radioButtonEpipolar = new QRadioButton(groupBoxMethod);
-        radioButtonEpipolar->setObjectName(QString::fromUtf8("radioButtonEpipolar"));
-        radioButtonEpipolar->setChecked(true);
+        radioButtonB2AC = new QRadioButton(groupBoxFit);
+        radioButtonB2AC->setObjectName(QString::fromUtf8("radioButtonB2AC"));
+        radioButtonB2AC->setChecked(true);
 
-        verticalLayout_14->addWidget(radioButtonEpipolar);
+        verticalLayout_18->addWidget(radioButtonB2AC);
 
-        radioButtonRebuild = new QRadioButton(groupBoxMethod);
-        radioButtonRebuild->setObjectName(QString::fromUtf8("radioButtonRebuild"));
+        radioButtonRANSAC = new QRadioButton(groupBoxFit);
+        radioButtonRANSAC->setObjectName(QString::fromUtf8("radioButtonRANSAC"));
+        radioButtonRANSAC->setChecked(false);
 
-        verticalLayout_14->addWidget(radioButtonRebuild);
+        verticalLayout_18->addWidget(radioButtonRANSAC);
 
 
-        gridLayout_6->addWidget(groupBoxMethod, 1, 4, 1, 1);
+        verticalLayout_24->addWidget(groupBoxFit);
 
-        groupBox_19 = new QGroupBox(groupBox_10);
+
+        horizontalLayout_21->addLayout(verticalLayout_24);
+
+        verticalLayout_25 = new QVBoxLayout();
+        verticalLayout_25->setSpacing(6);
+        verticalLayout_25->setObjectName(QString::fromUtf8("verticalLayout_25"));
+        groupBox_19 = new QGroupBox(groupBox_15);
         groupBox_19->setObjectName(QString::fromUtf8("groupBox_19"));
         verticalLayout_19 = new QVBoxLayout(groupBox_19);
         verticalLayout_19->setSpacing(6);
@@ -852,60 +882,56 @@ public:
 
         checkBoxRestore = new QCheckBox(groupBox_19);
         checkBoxRestore->setObjectName(QString::fromUtf8("checkBoxRestore"));
+        checkBoxRestore->setCheckable(false);
 
         verticalLayout_19->addWidget(checkBoxRestore);
 
 
-        gridLayout_6->addWidget(groupBox_19, 0, 4, 1, 1);
+        verticalLayout_25->addWidget(groupBox_19);
+
+        groupBoxMethod = new QGroupBox(groupBox_15);
+        groupBoxMethod->setObjectName(QString::fromUtf8("groupBoxMethod"));
+        verticalLayout_14 = new QVBoxLayout(groupBoxMethod);
+        verticalLayout_14->setSpacing(6);
+        verticalLayout_14->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_14->setObjectName(QString::fromUtf8("verticalLayout_14"));
+        radioButtonRebuild = new QRadioButton(groupBoxMethod);
+        radioButtonRebuild->setObjectName(QString::fromUtf8("radioButtonRebuild"));
+        sizePolicy.setHeightForWidth(radioButtonRebuild->sizePolicy().hasHeightForWidth());
+        radioButtonRebuild->setSizePolicy(sizePolicy);
+        radioButtonRebuild->setChecked(true);
+
+        verticalLayout_14->addWidget(radioButtonRebuild);
+
+        radioButtonEpipolar = new QRadioButton(groupBoxMethod);
+        radioButtonEpipolar->setObjectName(QString::fromUtf8("radioButtonEpipolar"));
+        sizePolicy.setHeightForWidth(radioButtonEpipolar->sizePolicy().hasHeightForWidth());
+        radioButtonEpipolar->setSizePolicy(sizePolicy);
+
+        verticalLayout_14->addWidget(radioButtonEpipolar);
 
 
-        verticalLayout_10->addWidget(groupBox_10);
-
-        groupBox_11 = new QGroupBox(tab_4);
-        groupBox_11->setObjectName(QString::fromUtf8("groupBox_11"));
-        gridLayout_5 = new QGridLayout(groupBox_11);
-        gridLayout_5->setSpacing(6);
-        gridLayout_5->setContentsMargins(11, 11, 11, 11);
-        gridLayout_5->setObjectName(QString::fromUtf8("gridLayout_5"));
-        horizontalLayout_6 = new QHBoxLayout();
-        horizontalLayout_6->setSpacing(6);
-        horizontalLayout_6->setObjectName(QString::fromUtf8("horizontalLayout_6"));
-        label_8 = new QLabel(groupBox_11);
-        label_8->setObjectName(QString::fromUtf8("label_8"));
-        label_8->setMaximumSize(QSize(100, 16777215));
-
-        horizontalLayout_6->addWidget(label_8);
-
-        outerDiameter = new QLineEdit(groupBox_11);
-        outerDiameter->setObjectName(QString::fromUtf8("outerDiameter"));
-        outerDiameter->setMaximumSize(QSize(120, 16777215));
-        outerDiameter->setReadOnly(true);
-
-        horizontalLayout_6->addWidget(outerDiameter);
+        verticalLayout_25->addWidget(groupBoxMethod);
 
 
-        gridLayout_5->addLayout(horizontalLayout_6, 1, 0, 1, 1);
-
-        horizontalLayout_8 = new QHBoxLayout();
-        horizontalLayout_8->setSpacing(6);
-        horizontalLayout_8->setObjectName(QString::fromUtf8("horizontalLayout_8"));
-        label_16 = new QLabel(groupBox_11);
-        label_16->setObjectName(QString::fromUtf8("label_16"));
-        label_16->setMaximumSize(QSize(100, 16777215));
-
-        horizontalLayout_8->addWidget(label_16);
-
-        delta = new QLineEdit(groupBox_11);
-        delta->setObjectName(QString::fromUtf8("delta"));
-        delta->setMaximumSize(QSize(120, 16777215));
-        delta->setReadOnly(true);
-
-        horizontalLayout_8->addWidget(delta);
+        horizontalLayout_21->addLayout(verticalLayout_25);
 
 
-        gridLayout_5->addLayout(horizontalLayout_8, 2, 0, 1, 1);
+        verticalLayout_21->addLayout(horizontalLayout_21);
 
-        groupBox_20 = new QGroupBox(groupBox_11);
+
+        verticalLayout_10->addWidget(groupBox_15);
+
+        groupBox_10 = new QGroupBox(tab_measure);
+        groupBox_10->setObjectName(QString::fromUtf8("groupBox_10"));
+        verticalLayout_26 = new QVBoxLayout(groupBox_10);
+        verticalLayout_26->setSpacing(6);
+        verticalLayout_26->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_26->setObjectName(QString::fromUtf8("verticalLayout_26"));
+        horizontalLayout_25 = new QHBoxLayout();
+        horizontalLayout_25->setSpacing(6);
+        horizontalLayout_25->setObjectName(QString::fromUtf8("horizontalLayout_25"));
+        groupBox_20 = new QGroupBox(groupBox_10);
         groupBox_20->setObjectName(QString::fromUtf8("groupBox_20"));
         verticalLayout_16 = new QVBoxLayout(groupBox_20);
         verticalLayout_16->setSpacing(6);
@@ -922,6 +948,9 @@ public:
 
         centerOuterC1 = new QLineEdit(groupBox_20);
         centerOuterC1->setObjectName(QString::fromUtf8("centerOuterC1"));
+        sizePolicy2.setHeightForWidth(centerOuterC1->sizePolicy().hasHeightForWidth());
+        centerOuterC1->setSizePolicy(sizePolicy2);
+        centerOuterC1->setMinimumSize(QSize(145, 0));
         centerOuterC1->setMaximumSize(QSize(150, 16777215));
         centerOuterC1->setReadOnly(true);
 
@@ -941,6 +970,9 @@ public:
 
         centerInnerC1 = new QLineEdit(groupBox_20);
         centerInnerC1->setObjectName(QString::fromUtf8("centerInnerC1"));
+        sizePolicy2.setHeightForWidth(centerInnerC1->sizePolicy().hasHeightForWidth());
+        centerInnerC1->setSizePolicy(sizePolicy2);
+        centerInnerC1->setMinimumSize(QSize(145, 0));
         centerInnerC1->setMaximumSize(QSize(150, 16777215));
         centerInnerC1->setReadOnly(true);
 
@@ -950,47 +982,9 @@ public:
         verticalLayout_16->addLayout(horizontalLayout_3);
 
 
-        gridLayout_5->addWidget(groupBox_20, 0, 0, 1, 1);
+        horizontalLayout_25->addWidget(groupBox_20);
 
-        horizontalLayout_15 = new QHBoxLayout();
-        horizontalLayout_15->setSpacing(6);
-        horizontalLayout_15->setObjectName(QString::fromUtf8("horizontalLayout_15"));
-        label_9 = new QLabel(groupBox_11);
-        label_9->setObjectName(QString::fromUtf8("label_9"));
-        label_9->setMaximumSize(QSize(100, 16777215));
-
-        horizontalLayout_15->addWidget(label_9);
-
-        innerDiameter = new QLineEdit(groupBox_11);
-        innerDiameter->setObjectName(QString::fromUtf8("innerDiameter"));
-        innerDiameter->setMaximumSize(QSize(120, 16777215));
-        innerDiameter->setReadOnly(true);
-
-        horizontalLayout_15->addWidget(innerDiameter);
-
-
-        gridLayout_5->addLayout(horizontalLayout_15, 1, 1, 1, 1);
-
-        horizontalLayout_16 = new QHBoxLayout();
-        horizontalLayout_16->setSpacing(6);
-        horizontalLayout_16->setObjectName(QString::fromUtf8("horizontalLayout_16"));
-        label_17 = new QLabel(groupBox_11);
-        label_17->setObjectName(QString::fromUtf8("label_17"));
-        label_17->setMaximumSize(QSize(100, 16777215));
-
-        horizontalLayout_16->addWidget(label_17);
-
-        deep = new QLineEdit(groupBox_11);
-        deep->setObjectName(QString::fromUtf8("deep"));
-        deep->setMaximumSize(QSize(120, 16777215));
-        deep->setReadOnly(true);
-
-        horizontalLayout_16->addWidget(deep);
-
-
-        gridLayout_5->addLayout(horizontalLayout_16, 2, 1, 1, 1);
-
-        groupBox_21 = new QGroupBox(groupBox_11);
+        groupBox_21 = new QGroupBox(groupBox_10);
         groupBox_21->setObjectName(QString::fromUtf8("groupBox_21"));
         verticalLayout_15 = new QVBoxLayout(groupBox_21);
         verticalLayout_15->setSpacing(6);
@@ -1007,6 +1001,9 @@ public:
 
         centerOuterC2 = new QLineEdit(groupBox_21);
         centerOuterC2->setObjectName(QString::fromUtf8("centerOuterC2"));
+        sizePolicy2.setHeightForWidth(centerOuterC2->sizePolicy().hasHeightForWidth());
+        centerOuterC2->setSizePolicy(sizePolicy2);
+        centerOuterC2->setMinimumSize(QSize(145, 0));
         centerOuterC2->setMaximumSize(QSize(150, 16777215));
         centerOuterC2->setReadOnly(true);
 
@@ -1026,6 +1023,9 @@ public:
 
         centerInnerC2 = new QLineEdit(groupBox_21);
         centerInnerC2->setObjectName(QString::fromUtf8("centerInnerC2"));
+        sizePolicy2.setHeightForWidth(centerInnerC2->sizePolicy().hasHeightForWidth());
+        centerInnerC2->setSizePolicy(sizePolicy2);
+        centerInnerC2->setMinimumSize(QSize(145, 0));
         centerInnerC2->setMaximumSize(QSize(150, 16777215));
         centerInnerC2->setReadOnly(true);
 
@@ -1035,14 +1035,99 @@ public:
         verticalLayout_15->addLayout(horizontalLayout_5);
 
 
-        gridLayout_5->addWidget(groupBox_21, 0, 1, 1, 1);
+        horizontalLayout_25->addWidget(groupBox_21);
+
+
+        verticalLayout_26->addLayout(horizontalLayout_25);
+
+        groupBox_11 = new QGroupBox(groupBox_10);
+        groupBox_11->setObjectName(QString::fromUtf8("groupBox_11"));
+        gridLayout_5 = new QGridLayout(groupBox_11);
+        gridLayout_5->setSpacing(6);
+        gridLayout_5->setContentsMargins(11, 11, 11, 11);
+        gridLayout_5->setObjectName(QString::fromUtf8("gridLayout_5"));
+        horizontalLayout_15 = new QHBoxLayout();
+        horizontalLayout_15->setSpacing(6);
+        horizontalLayout_15->setObjectName(QString::fromUtf8("horizontalLayout_15"));
+        label_9 = new QLabel(groupBox_11);
+        label_9->setObjectName(QString::fromUtf8("label_9"));
+        label_9->setMaximumSize(QSize(16777215, 16777215));
+
+        horizontalLayout_15->addWidget(label_9);
+
+        innerDiameter = new QLineEdit(groupBox_11);
+        innerDiameter->setObjectName(QString::fromUtf8("innerDiameter"));
+        innerDiameter->setMaximumSize(QSize(120, 16777215));
+        innerDiameter->setReadOnly(true);
+
+        horizontalLayout_15->addWidget(innerDiameter);
+
+
+        gridLayout_5->addLayout(horizontalLayout_15, 1, 1, 1, 1);
+
+        horizontalLayout_6 = new QHBoxLayout();
+        horizontalLayout_6->setSpacing(6);
+        horizontalLayout_6->setObjectName(QString::fromUtf8("horizontalLayout_6"));
+        label_8 = new QLabel(groupBox_11);
+        label_8->setObjectName(QString::fromUtf8("label_8"));
+        label_8->setMaximumSize(QSize(16777215, 16777215));
+
+        horizontalLayout_6->addWidget(label_8);
+
+        outerDiameter = new QLineEdit(groupBox_11);
+        outerDiameter->setObjectName(QString::fromUtf8("outerDiameter"));
+        outerDiameter->setMaximumSize(QSize(120, 16777215));
+        outerDiameter->setReadOnly(true);
+
+        horizontalLayout_6->addWidget(outerDiameter);
+
+
+        gridLayout_5->addLayout(horizontalLayout_6, 1, 0, 1, 1);
+
+        horizontalLayout_8 = new QHBoxLayout();
+        horizontalLayout_8->setSpacing(6);
+        horizontalLayout_8->setObjectName(QString::fromUtf8("horizontalLayout_8"));
+        label_16 = new QLabel(groupBox_11);
+        label_16->setObjectName(QString::fromUtf8("label_16"));
+        label_16->setMaximumSize(QSize(16777215, 16777215));
+
+        horizontalLayout_8->addWidget(label_16);
+
+        delta = new QLineEdit(groupBox_11);
+        delta->setObjectName(QString::fromUtf8("delta"));
+        delta->setMaximumSize(QSize(120, 16777215));
+        delta->setReadOnly(true);
+
+        horizontalLayout_8->addWidget(delta);
+
+
+        gridLayout_5->addLayout(horizontalLayout_8, 2, 0, 1, 1);
+
+        horizontalLayout_16 = new QHBoxLayout();
+        horizontalLayout_16->setSpacing(6);
+        horizontalLayout_16->setObjectName(QString::fromUtf8("horizontalLayout_16"));
+        label_17 = new QLabel(groupBox_11);
+        label_17->setObjectName(QString::fromUtf8("label_17"));
+        label_17->setMaximumSize(QSize(16777215, 16777215));
+
+        horizontalLayout_16->addWidget(label_17);
+
+        deep = new QLineEdit(groupBox_11);
+        deep->setObjectName(QString::fromUtf8("deep"));
+        deep->setMaximumSize(QSize(120, 16777215));
+        deep->setReadOnly(true);
+
+        horizontalLayout_16->addWidget(deep);
+
+
+        gridLayout_5->addLayout(horizontalLayout_16, 2, 1, 1, 1);
 
         horizontalLayout_13 = new QHBoxLayout();
         horizontalLayout_13->setSpacing(6);
         horizontalLayout_13->setObjectName(QString::fromUtf8("horizontalLayout_13"));
         label_20 = new QLabel(groupBox_11);
         label_20->setObjectName(QString::fromUtf8("label_20"));
-        label_20->setMaximumSize(QSize(100, 16777215));
+        label_20->setMaximumSize(QSize(16777215, 16777215));
 
         horizontalLayout_13->addWidget(label_20);
 
@@ -1057,18 +1142,24 @@ public:
         gridLayout_5->addLayout(horizontalLayout_13, 3, 0, 1, 1);
 
 
-        verticalLayout_10->addWidget(groupBox_11);
+        verticalLayout_26->addWidget(groupBox_11);
 
         verticalSpacer_3 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-        verticalLayout_10->addItem(verticalSpacer_3);
+        verticalLayout_26->addItem(verticalSpacer_3);
 
-        tabWidget->addTab(tab_4, QString());
+
+        verticalLayout_10->addWidget(groupBox_10);
+
+        tabWidget->addTab(tab_measure, QString());
 
         verticalLayout->addWidget(tabWidget);
 
         dockWidget->setWidget(dockWidgetContents);
         MSVisionQtClass->addDockWidget(static_cast<Qt::DockWidgetArea>(1), dockWidget);
+        statusBar = new QStatusBar(MSVisionQtClass);
+        statusBar->setObjectName(QString::fromUtf8("statusBar"));
+        MSVisionQtClass->setStatusBar(statusBar);
 
         menuBar->addAction(menu_F->menuAction());
         menuBar->addAction(menu_V->menuAction());
@@ -1112,7 +1203,7 @@ public:
         proptyC2Btn->setText(QApplication::translate("MSVisionQtClass", "C2\345\217\202\346\225\260\350\256\276\347\275\256", nullptr));
         groupBox_3->setTitle(QApplication::translate("MSVisionQtClass", "\347\233\270\346\234\272C1", nullptr));
         proptyC1Btn->setText(QApplication::translate("MSVisionQtClass", "C1\345\217\202\346\225\260\350\256\276\347\275\256", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_1), QApplication::translate("MSVisionQtClass", "\347\233\270\346\234\272\346\250\241\345\235\227", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_cameras), QApplication::translate("MSVisionQtClass", "\347\233\270\346\234\272\346\250\241\345\235\227", nullptr));
         groupBox_5->setTitle(QApplication::translate("MSVisionQtClass", "\350\277\236\346\216\245\351\200\211\346\213\251", nullptr));
         label_10->setText(QApplication::translate("MSVisionQtClass", "\350\277\236\346\216\245\346\226\271\345\274\217", nullptr));
         comboBoxConnect->setItemText(0, QApplication::translate("MSVisionQtClass", "USB", nullptr));
@@ -1144,43 +1235,45 @@ public:
         pushButton_11->setText(QApplication::translate("MSVisionQtClass", "\346\211\223\345\274\200\350\207\252\345\212\250\350\247\246\345\217\221", nullptr));
         pushButton_12->setText(QApplication::translate("MSVisionQtClass", "\345\205\263\351\227\255\350\207\252\345\212\250\350\247\246\345\217\221", nullptr));
         pushButton_13->setText(QApplication::translate("MSVisionQtClass", "\346\211\213\345\212\250\350\247\246\345\217\221", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MSVisionQtClass", "\345\205\211\346\272\220\346\250\241\345\235\227", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_light), QApplication::translate("MSVisionQtClass", "\345\205\211\346\272\220\346\250\241\345\235\227", nullptr));
         groupBox_12->setTitle(QApplication::translate("MSVisionQtClass", "\345\217\214\347\233\256\346\240\207\345\256\232\345\217\202\346\225\260", nullptr));
         groupBox_13->setTitle(QApplication::translate("MSVisionQtClass", "\346\211\213\347\234\274\346\240\207\345\256\232\345\217\202\346\225\260", nullptr));
         groupBox_14->setTitle(QApplication::translate("MSVisionQtClass", "\350\247\206\350\247\211\347\263\273\347\273\237\346\240\207\345\256\232\347\273\223\346\236\234", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_3), QApplication::translate("MSVisionQtClass", "\346\240\207\345\256\232\346\250\241\345\235\227", nullptr));
-        groupBox_10->setTitle(QApplication::translate("MSVisionQtClass", "\345\233\276\345\203\217\345\244\204\347\220\206\345\217\202\346\225\260", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_calibration), QApplication::translate("MSVisionQtClass", "\346\240\207\345\256\232\346\250\241\345\235\227", nullptr));
+        groupBox_15->setTitle(QApplication::translate("MSVisionQtClass", "\345\233\276\345\203\217\345\244\204\347\220\206\345\217\202\346\225\260", nullptr));
         loadDataBtn->setText(QApplication::translate("MSVisionQtClass", "\345\257\274\345\205\245\346\240\207\345\256\232\347\273\223\346\236\234", nullptr));
-        groupBoxFit->setTitle(QApplication::translate("MSVisionQtClass", "\346\244\255\345\234\206\346\213\237\345\220\210\346\226\271\346\263\225", nullptr));
-        radioButtonAMS->setText(QApplication::translate("MSVisionQtClass", "AMS", nullptr));
-        radioButtonB2AC->setText(QApplication::translate("MSVisionQtClass", "B2AC", nullptr));
-        radioButtonRANSAC->setText(QApplication::translate("MSVisionQtClass", "RANSAC", nullptr));
+        detectBtn->setText(QApplication::translate("MSVisionQtClass", "\345\274\200\345\247\213\346\265\213\351\207\217", nullptr));
         groupBox_16->setTitle(QApplication::translate("MSVisionQtClass", "\351\242\204\345\244\204\347\220\206\345\217\202\346\225\260", nullptr));
         label_18->setText(QApplication::translate("MSVisionQtClass", "\351\253\230\346\226\257\346\273\244\346\263\242\346\240\270\345\260\272\345\257\270", nullptr));
         label_19->setText(QApplication::translate("MSVisionQtClass", "\345\217\214\350\276\271\346\273\244\346\263\242\345\217\202\346\225\260", nullptr));
         groupBoxHoleType->setTitle(QApplication::translate("MSVisionQtClass", "\345\255\224\347\261\273\345\236\213", nullptr));
         straightHole->setText(QApplication::translate("MSVisionQtClass", "\345\215\225\347\233\264\345\255\224", nullptr));
         countersinkHole->setText(QApplication::translate("MSVisionQtClass", "\351\224\252\347\252\235\345\255\224", nullptr));
-        detectBtn->setText(QApplication::translate("MSVisionQtClass", "\345\274\200\345\247\213\346\265\213\351\207\217", nullptr));
-        groupBoxMethod->setTitle(QApplication::translate("MSVisionQtClass", "\345\217\214\347\233\256\346\265\213\351\207\217\346\226\271\346\263\225", nullptr));
-        radioButtonEpipolar->setText(QApplication::translate("MSVisionQtClass", "\345\217\214\347\233\256\351\207\215\345\273\272\346\263\225", nullptr));
-        radioButtonRebuild->setText(QApplication::translate("MSVisionQtClass", "\346\236\201\347\272\277\345\214\271\351\205\215\346\263\225", nullptr));
+        groupBoxFit->setTitle(QApplication::translate("MSVisionQtClass", "\346\244\255\345\234\206\346\213\237\345\220\210\346\226\271\346\263\225", nullptr));
+        radioButtonAMS->setText(QApplication::translate("MSVisionQtClass", "AMS", nullptr));
+        radioButtonB2AC->setText(QApplication::translate("MSVisionQtClass", "B2AC", nullptr));
+        radioButtonRANSAC->setText(QApplication::translate("MSVisionQtClass", "RANSAC", nullptr));
         groupBox_19->setTitle(QApplication::translate("MSVisionQtClass", "\345\205\266\344\273\226\345\217\202\346\225\260", nullptr));
         checkBoxSharpen->setText(QApplication::translate("MSVisionQtClass", "\345\233\276\345\203\217\351\224\220\345\214\226", nullptr));
         checkBoxRestore->setText(QApplication::translate("MSVisionQtClass", "\345\233\276\345\203\217\347\246\273\347\204\246\345\244\215\345\216\237", nullptr));
-        groupBox_11->setTitle(QApplication::translate("MSVisionQtClass", "\346\265\213\351\207\217\347\273\223\346\236\234", nullptr));
-        label_8->setText(QApplication::translate("MSVisionQtClass", "\345\271\263\345\235\207\345\206\205\345\234\206\347\233\264\345\276\204/mm", nullptr));
-        label_16->setText(QApplication::translate("MSVisionQtClass", "\351\224\252\347\252\235\345\255\224\345\236\202\347\233\264\345\272\246/\302\260", nullptr));
+        groupBoxMethod->setTitle(QApplication::translate("MSVisionQtClass", "\345\217\214\347\233\256\346\265\213\351\207\217\346\226\271\346\263\225", nullptr));
+        radioButtonRebuild->setText(QApplication::translate("MSVisionQtClass", "\345\217\214\347\233\256\351\207\215\345\273\272\346\263\225", nullptr));
+        radioButtonEpipolar->setText(QApplication::translate("MSVisionQtClass", "\346\236\201\347\272\277\345\214\271\351\205\215\346\263\225", nullptr));
+        groupBox_10->setTitle(QApplication::translate("MSVisionQtClass", "\346\265\213\351\207\217\347\273\223\346\236\234", nullptr));
         groupBox_20->setTitle(QApplication::translate("MSVisionQtClass", "C1\347\273\223\346\236\234", nullptr));
         label->setText(QApplication::translate("MSVisionQtClass", "\345\206\205\345\234\206\344\270\255\345\277\203\345\235\220\346\240\207", nullptr));
+        centerOuterC1->setText(QString());
         label_3->setText(QApplication::translate("MSVisionQtClass", "\345\244\226\345\234\206\344\270\255\345\277\203\345\235\220\346\240\207", nullptr));
-        label_9->setText(QApplication::translate("MSVisionQtClass", "\345\271\263\345\235\207\345\244\226\345\234\206\347\233\264\345\276\204/mm", nullptr));
-        label_17->setText(QApplication::translate("MSVisionQtClass", "\351\224\252\347\252\235\345\255\224\346\267\261\345\272\246/mm", nullptr));
         groupBox_21->setTitle(QApplication::translate("MSVisionQtClass", "C2\347\273\223\346\236\234", nullptr));
         label_4->setText(QApplication::translate("MSVisionQtClass", "\345\206\205\345\234\206\344\270\255\345\277\203\345\235\220\346\240\207", nullptr));
         label_5->setText(QApplication::translate("MSVisionQtClass", "\345\244\226\345\234\206\344\270\255\345\277\203\345\235\220\346\240\207", nullptr));
-        label_20->setText(QApplication::translate("MSVisionQtClass", "\345\215\225\346\254\241\346\243\200\346\265\213\350\200\227\346\227\266/s", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_4), QApplication::translate("MSVisionQtClass", "\346\265\213\351\207\217\346\250\241\345\235\227", nullptr));
+        groupBox_11->setTitle(QApplication::translate("MSVisionQtClass", "\347\233\270\345\205\263\345\217\202\346\225\260", nullptr));
+        label_9->setText(QApplication::translate("MSVisionQtClass", "\345\271\263\345\235\207\345\244\226\345\234\206\347\233\264\345\276\204/mm", nullptr));
+        label_8->setText(QApplication::translate("MSVisionQtClass", "\345\271\263\345\235\207\345\206\205\345\234\206\347\233\264\345\276\204/mm", nullptr));
+        label_16->setText(QApplication::translate("MSVisionQtClass", "\351\224\252\347\252\235\345\255\224\345\236\202\347\233\264\345\272\246/\302\260", nullptr));
+        label_17->setText(QApplication::translate("MSVisionQtClass", "\351\224\252\347\252\235\345\255\224\346\267\261\345\272\246/mm  ", nullptr));
+        label_20->setText(QApplication::translate("MSVisionQtClass", "\345\215\225\346\254\241\346\243\200\346\265\213\350\200\227\346\227\266/s ", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_measure), QApplication::translate("MSVisionQtClass", "\346\265\213\351\207\217\346\250\241\345\235\227", nullptr));
     } // retranslateUi
 
 };

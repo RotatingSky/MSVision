@@ -236,7 +236,6 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MSVisionQt.h" />
-    <ClInclude Include="LightControl.h" />
     <QtMoc Include="MSLabel.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

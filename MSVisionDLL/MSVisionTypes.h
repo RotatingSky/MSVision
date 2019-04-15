@@ -16,7 +16,7 @@ namespace ms
 	const int RansacBatch = 5;
 
 	// An enum type for error or exceptions process
-	typedef enum
+	enum MSInfoCode
 	{
 		MS_SUCCESS = 0,
 		MS_ARGUMENT_ERROR = -1,
@@ -28,23 +28,47 @@ namespace ms
 		MS_ROI_SIZE_ERROR = -7,
 		MS_IMG_TYPE_ERROR = -8,
 		MS_DIVIDE_ZERO_ERROR = -9
-	} MSInfoCode;
+	};
 
 	// An enum for color selection
-	typedef enum
+	enum MSChannel
 	{
 		MS_DEFAULT_CHANNEL = 0x00,
 		MS_BLUE = 0x01,
 		MS_GREEN = 0x02,
 		MS_RED = 0x04
-	} MSVChannel;
+	};
 
 	// An enum for fitting ellipse
-	typedef enum
+	enum MSFitMethod
 	{
 		FIT_ELLIPSE_GENERAL = 0,
 		FIT_ELLIPSE_AMS,
 		FIT_ELLIPSE_DIRECT,
 		FIT_ELLIPSE_RANSAC
-	} MSFitMethod;
+	};
+
+	// An enum for selecting light channel
+	enum MSLightChannel
+	{
+		LIGHT_CHANNEL1 = 1,
+		LIGHT_CHANNEL2,
+		LIGHT_CHANNEL3,
+		LIGHT_CHANNEL4
+	};
+
+	// An enum for light mode
+	enum MSLightMode
+	{
+		LIGHT_CONSTANT = 0,
+		LIGHT_TRIGGER = 1,
+		LIGHT_AUTOSTROBE = 3
+	};
+
+	// An enum for light state
+	enum MSLightState
+	{
+		LIGHT_ON = 1,
+		LIGHT_OFF = 0
+	};
 } // namespace ms

@@ -10,7 +10,6 @@
 
 // Standard and Windows library
 #include <iostream>
-#include <Windows.h>
 // Qt libraries
 #include <QtWidgets/QMainWindow>
 #include <QMessagebox>
@@ -72,6 +71,8 @@ public slots:
 	// For detection
 	void on_loadData();
 	void on_holeType(int);
+	void on_kernelSize();
+	void on_bilateral();
 	void on_fitMethod(int);
 	void on_measureType(int);
 	void on_detect();
@@ -81,8 +82,8 @@ public slots:
 protected:
 	void initCam();
 	void drawImgs(int);
-	cv::Mat qImage2cvMat(QImage qtImg);
-	QImage cvMat2qImage(cv::Mat matImg);
+	cv::Mat qImage2cvMat(const QImage &qtImg);
+	QImage cvMat2qImage(const cv::Mat &matImg);
 	ms::MSInfoCode detectImg(int);
 	void measure();
 
@@ -97,10 +98,12 @@ private:
 	HANDLE mvProperties[ms::CamsNum];
 	MVCamInfo mvCamInfos[ms::CamsNum];
 	MV_PixelFormatEnums mvPixelFormats[ms::CamsNum];
+	TriggerModeEnums mvTriggerMode[ms::CamsNum];
 	MVImage mvImgs[ms::CamsNum];
 	QImage qtImgs[ms::CamsNum];
 	QImage showQtImgs[ms::CamsNum];
 	QString saveImgPath;
+	QString saveHoleParamsPath;
 	bool mvInitLibFlag;
 	bool linkedFlag;
 	bool lightConnectFlag;
@@ -108,7 +111,7 @@ private:
 	bool loadFlag;
 	bool sharpFlag;
 	bool restoreFlag;
-	int showFlag;
+	bool showFlag;
 	byte lightChannel;
 	QButtonGroup *channelBtns;
 	QButtonGroup *holeTypeRadBtns;
@@ -119,10 +122,12 @@ private:
 	cv::Mat R;
 	cv::Mat t;
 	HoleType mvHoleType;
+	MeasureType mvMeasureType;
 	ms::MSFitMethod fitMethod;
-	MeasureType measureType;
 	std::vector<cv::RotatedRect> rRects[ms::CamsNum];
 	float scope;
+	int kernelSize;
+	double fBilateral;
 	int pointsNum;
 	double bitAngle;
 	double sTime;

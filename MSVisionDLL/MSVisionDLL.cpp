@@ -271,10 +271,12 @@ namespace ms
 		float focusEntropy = 0;
 		for (int i = 0; i < level; i++)
 		{
+			float* pHori = dstHoriHist.ptr<float>(i);
+			float* pVert = dstVertHist.ptr<float>(i);
 			for (int j = 0; j < level; j++)
 			{
-				float binHoriValue = dstHoriHist.at<float>(i, j);
-				float binVertValue = dstVertHist.at<float>(i, j);
+				float binHoriValue = pHori[j];
+				float binVertValue = pVert[j];
 				if (binHoriValue > 0)
 				{
 					float probHori = binHoriValue / denomHori;
@@ -1811,8 +1813,10 @@ namespace ms
 		int curveNum = 2,
 		int layerNum = 4,
 		int kernelSize = 3,
+		double fBilateral = 1.0,
 		int segNum = 10,
-		float distThreshold = 2.f)
+		float distThreshold = 2.f,
+		MSFitMethod fitMethod = FIT_ELLIPSE_DIRECT)
 	{
 		// Check parameters
 		if (src.empty())
@@ -1829,7 +1833,6 @@ namespace ms
 		}
 
 		// Parameters for image process
-		double fBilateral = 1.0;
 		double ffB = 2.0;
 
 		// Detect ellipses in bottom layer
@@ -1852,7 +1855,8 @@ namespace ms
 			segNum,
 			curveSize,
 			angleThreshold,
-			distThreshold * 2.5);
+			distThreshold * 2.5,
+			fitMethod);
 		if (status != MS_SUCCESS)
 		{
 			return status;
@@ -1961,7 +1965,7 @@ namespace ms
 				getCompatiblePoints(tempImg, temprRects[k], curves[k], rangeThreshold);
 				if (static_cast<int>(curves[k].size()) > RansacBatch)
 				{
-					cv::RotatedRect rRect = cv::fitEllipseDirect(curves[k]);
+					cv::RotatedRect rRect = cv::fitEllipseAMS(curves[k]);
 					temprRects[k] = rRect;
 				}
 				else
@@ -2532,20 +2536,22 @@ namespace ms
 		double depth)
 	{
 		// Save calibration parameters
-		cv::FileStorage fs(fileName, cv::FileStorage::WRITE || cv::FileStorage::APPEND);
+		cv::FileStorage fs(fileName, cv::FileStorage::APPEND);
 		if (!fs.isOpened())
 		{
 			return MS_SAVE_FIEL_ERROR;
 		}
 		// Here should not exist spaces in the name.
-		fs << "Left_Center_1" << center[0][0]
+		fs << "Hole" << "{"
+			<< "Left_Center_1" << center[0][0]
 			<< "Left_Center_2" << center[1][0]
 			<< "Right_Center_1" << center[0][1]
-			<< "Right_Center_2" << center[1][1];
-		fs << "Diameter_1" << diameter[0]
+			<< "Right_Center_2" << center[1][1]
+			<< "Diameter_1" << diameter[0]
 			<< "Diameter_2" << diameter[1]
 			<< "Delta" << verticality
-			<< "Deep" << depth;
+			<< "Deep" << depth
+			<< "}";
 		fs.release();
 		return MS_SUCCESS;
 	}

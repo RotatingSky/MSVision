@@ -27,11 +27,14 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 	loadFlag(false),
 	sharpFlag(true),
 	restoreFlag(false),
-	showFlag(0),
-	lightChannel(CHANNEL1),
+	showFlag(false),
+	lightChannel(ms::LIGHT_CHANNEL1),
 	mvHoleType(CountersinkHole),
+	mvMeasureType(Reconstruction),
 	fitMethod(ms::FIT_ELLIPSE_DIRECT),
 	scope(0.75f),
+	kernelSize(3),
+	fBilateral(1.0),
 	pointsNum(53),
 	bitAngle(100.0)
 {
@@ -62,8 +65,8 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 	fitMethodRadBtns->addButton(ui.radioButtonRANSAC, 2);
 	fitMethodRadBtns->setExclusive(true);
 	measureRadBtns = new QButtonGroup();
-	measureRadBtns->addButton(ui.radioButtonEpipolar, 0);
-	measureRadBtns->addButton(ui.radioButtonRebuild, 1);
+	measureRadBtns->addButton(ui.radioButtonRebuild, 0);
+	measureRadBtns->addButton(ui.radioButtonEpipolar, 1);
 
 	// Initialize variables
 	for (int i = 0; i < ms::CamsNum; i++)
@@ -92,6 +95,8 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 	connect(ui.spinStrobeWidth, SIGNAL(valueChanged(int)), this, SLOT(on_strobeWidth()));
 	connect(ui.loadDataBtn, SIGNAL(clicked()), this, SLOT(on_loadData()));
 	connect(holeTypeRadBtns, SIGNAL(buttonClicked(int)), this, SLOT(on_holeType(int)));
+	connect(ui.spinKernelSize, SIGNAL(valueChanged(int)), this, SLOT(on_kernelSize()));
+	connect(ui.doubleSpinBilateral, SIGNAL(valueChanged(int)), this, SLOT(on_bilateral()));
 	connect(fitMethodRadBtns, SIGNAL(buttonClicked(int)), this, SLOT(on_fitMethod(int)));
 	connect(measureRadBtns, SIGNAL(buttonClicked(int)), this, SLOT(on_measureType(int)));
 	connect(ui.checkBoxSharpen, SIGNAL(stateChanged(int)), this, SLOT(on_sharpen()));
@@ -101,12 +106,16 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 
 MSVisionQt::~MSVisionQt()
 {
+	// Release propty setting
 	for (int i = 0; i < ms::CamsNum; i++)
 	{
 		MVCamProptySheetDestroy(mvProperties[i]);
 	}
+	// Stopping cameras
 	on_stopCam();
-	api_LE_SetCONSTOnOff(lightChannel, LIGHT_OFF);
+	// Turn off light
+	api_LE_SetCONSTOnOff(lightChannel, ms::LIGHT_OFF);
+	// Release MV library
 	MVTerminateLib();
 }
 
@@ -150,18 +159,15 @@ void MSVisionQt::initCam()
 		else if(numCam <= 0)
 		{
 			WARNMSG("Cannot find cameras, please check the link or IP configuration");
-			exit(-1);
 		}
 		else
 		{
 			WARNMSG("Cannot find all cameras, please check the linke or IP configuration");
-			exit(-1);
 		}
 	}
 	else
 	{
 		WARNMSG("Cannot initialize cameras");
-		exit(-1);
 	}
 }
 
@@ -209,7 +215,7 @@ void MSVisionQt::drawImgs(int index)
 	}
 }
 
-cv::Mat MSVisionQt::qImage2cvMat(QImage qtImg)
+cv::Mat MSVisionQt::qImage2cvMat(const QImage &qtImg)
 {
 	cv::Mat matImg;
 	switch (qtImg.format())
@@ -227,7 +233,7 @@ cv::Mat MSVisionQt::qImage2cvMat(QImage qtImg)
 	return matImg;
 }
 
-QImage MSVisionQt::cvMat2qImage(cv::Mat matImg)
+QImage MSVisionQt::cvMat2qImage(const cv::Mat &matImg)
 {
 	QImage qtImg;
 	if (matImg.channels() == 1)
@@ -314,7 +320,7 @@ ms::MSInfoCode MSVisionQt::detectImg(int index)
 	}
 	// Grab ellipses from image and draw
 	ms::MSInfoCode status;
-	status = ms::pyrEllipse(tempImg, rRects[index], rRectsNum, 4, 3, 10, 2.f);
+	status = ms::pyrEllipse(tempImg, rRects[index], rRectsNum, 4, kernelSize, fBilateral, 10, 2.f, fitMethod);
 	if (status != ms::MS_SUCCESS)
 	{
 		return status;
@@ -345,7 +351,7 @@ void MSVisionQt::measure()
 		double diameters[2];
 		double delta = 0;
 		double deep = 0;
-		if (measureType == Reconstruction)
+		if (mvMeasureType == Reconstruction)
 		{
 			// Reconstruct the ellipses
 			std::vector<cv::RotatedRect> tempRects(ms::CamsNum);
@@ -362,7 +368,7 @@ void MSVisionQt::measure()
 			ms::getVerticalityDepth(R1, t1, delta, deep);
 			delta *= 180 / CV_PI;
 		}
-		else if (measureType == EpipolarMatching)
+		else if (mvMeasureType == EpipolarMatching)
 		{
 			// Epipolar method for measurement
 			std::vector<cv::RotatedRect> tempRects(ms::CamsNum);
@@ -411,12 +417,26 @@ void MSVisionQt::measure()
 		ui.innerDiameter->setText(strInnerD);
 		ui.delta->setText(strDelta);
 		ui.deep->setText(strDeep);
+
+		// Save parameters of the countersink hole
+		if (saveHoleParamsPath == "")
+		{
+			saveHoleParamsPath = QFileDialog::getSaveFileName(
+				this,
+				tr(u8"保存文件"),
+				tr(""),
+				tr(u8"YML文件(*.yml);;XML文件(*.xml)"));
+		}
+		if (!saveHoleParamsPath.isNull())
+		{
+			ms::saveHoleParameters(saveHoleParamsPath.toStdString(), xyzs, diameters, delta, deep);
+		}
 	}
 	else if (mvHoleType == StraightHole)
 	{
 		cv::Point3d xyzs[ms::CamsNum];
 		double diameter;
-		if (measureType == Reconstruction)
+		if (mvMeasureType == Reconstruction)
 		{
 			std::vector<cv::RotatedRect> tempRects(2);
 			cv::Mat R1;
@@ -426,7 +446,7 @@ void MSVisionQt::measure()
 			tempRects[1] = rRects[1][0];
 			ms::conicReconstruction(tempRects, intrinsics, R, t, R1, t1, diameter, E, xyzs);
 		}
-		else if (measureType == EpipolarMatching)
+		else if (mvMeasureType == EpipolarMatching)
 		{
 			cv::Point3d xyzs[ms::CamsNum];
 			std::vector<cv::RotatedRect> tempRects(ms::CamsNum);
@@ -455,7 +475,7 @@ void MSVisionQt::measure()
 
 void MSVisionQt::on_linkCam()
 {
-	std::vector<bool> mvLinkCamState(numCam, false);
+	std::vector<bool> mvLinkCamState(ms::CamsNum, false);
 	if (!mvInitLibFlag)
 	{
 		initCam();
@@ -492,6 +512,11 @@ void MSVisionQt::on_linkCam()
 				MVGetHeight(mvCamHandles[i], &height);
 				MVGetPixelFormat(mvCamHandles[i], &mvPixelFormats[i]);
 				mvImgs[i].CreateByPixelFormat(width, height, mvPixelFormats[i]);
+				MVGetTriggerMode(mvCamHandles[i], &mvTriggerMode[i]);
+				if (mvTriggerMode[i] != TriggerMode_Off)
+				{
+					MVSetTriggerMode(mvCamHandles[i], TriggerMode_Off);
+				}
 				// Create property sheet
 				std::string proptyTitle = "Propty C" + std::to_string(i + 1);
 				MVCamProptySheetInit(&mvProperties[i], mvCamHandles[i], 0, LPCTSTR(proptyTitle.c_str()));
@@ -501,12 +526,15 @@ void MSVisionQt::on_linkCam()
 					linkedFlag = true;
 					ui.linkBtn->setText(u8"断开连接");
 					ui.sampleBtn->setEnabled(true);
+					ui.proptyC1Btn->setEnabled(true);
+					ui.proptyC2Btn->setEnabled(true);
 				}
 			}
 		}
 	}
 	else
 	{
+		// Stop sampling and reset the state
 		on_stopCam();
 		for (int i = 0; i < ms::CamsNum; i++)
 		{
@@ -520,6 +548,8 @@ void MSVisionQt::on_linkCam()
 		linkedFlag = false;
 		ui.linkBtn->setText(u8"连接相机");
 		ui.sampleBtn->setDisabled(true);
+		ui.proptyC1Btn->setDisabled(true);
+		ui.proptyC2Btn->setDisabled(true);
 	}
 }
 
@@ -532,7 +562,7 @@ int MSVisionQt::onStreamCB(MV_IMAGE_INFO *pInfo, int index)
 	{
 		MVInfo2Image(mvCamHandles[index], pInfo, &mvImgs[index]);
 		qtImgs[index] = QImage((uchar*)(mvImgs[index].GetBits()), mvImgs[index].GetWidth(), mvImgs[index].GetHeight(), QImage::Format_Indexed8);
-		// Qt must use "lut" to show gray Image. 
+		// Qt must use "lut" to show gray Image.
 		QVector<QRgb> grayTable;
 		for (int i = 0; i < 256; i++)
 		{
@@ -545,17 +575,11 @@ int MSVisionQt::onStreamCB(MV_IMAGE_INFO *pInfo, int index)
 		MVBayerToRGB(mvCamHandles[index], pInfo->pImageBuffer, mvImgs[index].GetBits(), mvImgs[index].GetPitch(), w, h, mvPixelFormats[index]);
 		qtImgs[index] = QImage((uchar*)(mvImgs[index].GetBits()), mvImgs[index].GetWidth(), mvImgs[index].GetHeight(), QImage::Format_RGB888);
 	}
-	if (showFlag > 0)
+	if (showFlag == true)
 	{
 		drawImgs(-1);
-		if (showFlag < 50)
-		{
-			showFlag++;
-		}
-		else
-		{
-			showFlag = 0;
-		}
+		cv::waitKey(2000);
+		showFlag = false;
 	}
 	else
 	{
@@ -673,7 +697,12 @@ void MSVisionQt::on_connect()
 		{
 			errCode = api_LE_ComportConnect((byte)ui.comboBoxChannel->currentIndex());
 		}
-		errCode = api_LE_SetCHMode(lightChannel, CONSTANT);
+		if (errCode != 0)
+		{
+			WARNMSG("Please check the link of light");
+			return;
+		}
+		errCode = api_LE_SetCHMode(lightChannel, ms::LIGHT_CONSTANT);
 		lightConnectFlag = true;
 		lightFlag = true;
 		ui.comboBoxConnect->setDisabled(true);
@@ -690,6 +719,11 @@ void MSVisionQt::on_connect()
 		{
 			errCode = api_LE_ComportDisConnect((byte)ui.comboBoxChannel->currentIndex());
 		}
+		if (errCode != 0)
+		{
+			WARNMSG("Please check the link of light");
+			return;
+		}
 		lightConnectFlag = false;
 		ui.comboBoxConnect->setEnabled(true);
 		ui.comboBoxChannel->setEnabled(true);
@@ -701,10 +735,10 @@ void MSVisionQt::on_changeChannel(int index)
 {
 	switch (index)
 	{
-	case 0: lightChannel = CHANNEL1; break;
-	case 1: lightChannel = CHANNEL2; break;
-	case 2: lightChannel = CHANNEL3; break;
-	case 3: lightChannel = CHANNEL4; break;
+	case 0: lightChannel = ms::LIGHT_CHANNEL1; break;
+	case 1: lightChannel = ms::LIGHT_CHANNEL2; break;
+	case 2: lightChannel = ms::LIGHT_CHANNEL3; break;
+	case 3: lightChannel = ms::LIGHT_CHANNEL4; break;
 	}
 }
 
@@ -725,12 +759,12 @@ void MSVisionQt::on_lightOnOff()
 	byte errCode;
 	if (!lightFlag)
 	{
-		errCode = api_LE_SetCONSTOnOff(lightChannel, LIGHT_ON);
+		errCode = api_LE_SetCONSTOnOff(lightChannel, ms::LIGHT_ON);
 		lightFlag = true;
 	}
 	else
 	{
-		errCode = api_LE_SetCONSTOnOff(lightChannel, LIGHT_OFF);
+		errCode = api_LE_SetCONSTOnOff(lightChannel, ms::LIGHT_OFF);
 		lightFlag = false;
 	}
 }
@@ -767,13 +801,23 @@ void MSVisionQt::on_holeType(int index)
 	}
 }
 
+void MSVisionQt::on_kernelSize()
+{
+	kernelSize = ui.spinKernelSize->value();
+}
+
+void MSVisionQt::on_bilateral()
+{
+	fBilateral = ui.doubleSpinBilateral->value();
+}
+
 void MSVisionQt::on_fitMethod(int index)
 {
 	switch (index)
 	{
-	case 0: fitMethod = ms::FIT_ELLIPSE_AMS;
-	case 1: fitMethod = ms::FIT_ELLIPSE_DIRECT;
-	case 2: fitMethod = ms::FIT_ELLIPSE_RANSAC;
+	case 0: fitMethod = ms::FIT_ELLIPSE_AMS; break;
+	case 1: fitMethod = ms::FIT_ELLIPSE_DIRECT; break;
+	case 2: fitMethod = ms::FIT_ELLIPSE_RANSAC; break;
 	}
 }
 
@@ -781,8 +825,8 @@ void MSVisionQt::on_measureType(int index)
 {
 	switch (index)
 	{
-	case 0: measureType = Reconstruction;
-	case 1: measureType = EpipolarMatching;
+	case 0: mvMeasureType = Reconstruction; break;
+	case 1: mvMeasureType = EpipolarMatching; break;
 	}
 }
 
@@ -820,6 +864,13 @@ void MSVisionQt::on_detect()
 	}
 
 	// Measure the hole
+	ui.detectBtn->setDisabled(true);
+	ui.statusBar->showMessage(u8"正在检测...");
+	cv::waitKey(1);
+	for (int i = 0; i < ms::CamsNum; i++)
+	{
+		MVSetTriggerMode(mvCamHandles[0], TriggerMode_On);
+	}
 	sTime = (double)cv::getTickCount();
 	ms::MSInfoCode status;
 	for (int i = 0; i < ms::CamsNum; i++)
@@ -842,9 +893,15 @@ void MSVisionQt::on_detect()
 			return;
 		}
 	}
-	showFlag = 1;
+	showFlag = true;
 	measure();
 	double eTime = ((double)cv::getTickCount() - sTime) / cv::getTickFrequency();
 	QString strTime = QString::number(eTime, 10, 3);
 	ui.timeUsed->setText(strTime);
+	ui.statusBar->showMessage(u8"检测成功", 2000);
+	for (int i = 0; i < ms::CamsNum; i++)
+	{
+		MVSetTriggerMode(mvCamHandles[0], TriggerMode_Off);
+	}
+	ui.detectBtn->setEnabled(true);
 }

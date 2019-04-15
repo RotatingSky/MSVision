@@ -91,6 +91,72 @@ namespace ms
 		MSFitMethod fitMethod);
 
 	/**
+	 * Linear transformation of an image.
+	 * @params
+	 *		src		- input image
+	 *		dst		- output transformed image
+	 *		alpha	- multiplier
+	 *		beta	- constant offset
+	 * @return
+	 *		void
+	 */
+	EXPORT_API void imgLinearTrans(
+		const cv::Mat &src,
+		cv::Mat &dst,
+		float alpha,
+		float beta);
+
+	/**
+	 * Gamma transformation of an image.
+	 * @params
+	 *		src		- input image
+	 *		dst		- output transformed image
+	 *		fGamma	- gamma factor
+	 * @return
+	 *		void
+	 */
+	EXPORT_API void imgGammaTrans(
+		const cv::Mat &src,
+		cv::Mat &dst,
+		double fGamma);
+
+	/**
+	 * Adjust the brightness of an image.
+	 * @params
+	 *		src			- input image
+	 *		dst			- output transformed image
+	 *		refBright	- referent brightness value
+	 * @return
+	 *		MSInfoCode	- state of the code
+	 */
+	EXPORT_API MSInfoCode adjustBright(
+		const cv::Mat &src,
+		cv::Mat &dst,
+		float refBright);
+
+	/**
+	 * Get focus entropy of an image for autofocus.
+	 * @params
+	 *		src		- input image
+	 * @return
+	 *		float	- focus entropy value
+	 */
+	EXPORT_API float getFocusEntropy(
+		const cv::Mat &src);
+
+	/**
+	 * Edge detection by Zernike moments.
+	 * @params
+	 *		src			- input image
+	 *		dst			- output transformed image
+	 * @return
+	 *		MSInfoCode	- state of the code
+	 */
+	EXPORT_API MSInfoCode zernikeDetect(
+		const cv::Mat &src,
+		cv::Mat &dst);
+
+	/**
 	 * Gaussian Pyramid method for grabbing ellipses.
 	 * @params
 	 *		src				- input image
@@ -100,8 +166,9 @@ namespace ms
 	 *		kernelSize		- size of Gaussian filter kernel
 	 *		segNum			- points number of a segment
 	 *		distThreshold	- threshold of neighbor distance
+	 *		MSFitMethod		- internal fitting method
 	 * @return
-	 *		MSInfoCode	- state of the code
+	 *		MSInfoCode		- state of the code
 	 */
 	EXPORT_API MSInfoCode pyrEllipse(
 		const cv::Mat &src,
@@ -109,8 +176,10 @@ namespace ms
 		int curveNum,
 		int layerNum,
 		int kernelSize,
+		double fBilateral,
 		int segNum,
-		float distThreshold);
+		float distThreshold,
+		MSFitMethod MSFitMethod);
 
 	/**
 	 * Get the center and diameter of the hole.

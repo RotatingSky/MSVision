@@ -5,13 +5,10 @@
  * @since:		2019-01-15
  */
 
-
 #pragma once
-
 
 #include <QLabel>
 #include <QPaintEvent>
-
 
 class MSLabel : public QLabel
 {
