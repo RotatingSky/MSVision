@@ -578,7 +578,7 @@ int MSVisionQt::onStreamCB(MV_IMAGE_INFO *pInfo, int index)
 	if (showFlag == true)
 	{
 		drawImgs(-1);
-		cv::waitKey(2000);
+		cv::waitKey(1000);
 		showFlag = false;
 	}
 	else

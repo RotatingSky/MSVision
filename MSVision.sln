@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MSVisionQt", "MSVisionQt\MS
 		{62F5D22A-F0DB-46EB-8235-71E705D600CD} = {62F5D22A-F0DB-46EB-8235-71E705D600CD}
 	EndProjectSection
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MSVisionSetup", "MSVisionSetup\MSVisionSetup.vdproj", "{8429DEBA-6D14-4E77-9E98-085B965C81EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -42,6 +44,12 @@ Global
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.ActiveCfg = Release|x64
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.Build.0 = Release|x64
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x86.ActiveCfg = Release|x64
+		{8429DEBA-6D14-4E77-9E98-085B965C81EE}.Debug|Win32.ActiveCfg = Debug
+		{8429DEBA-6D14-4E77-9E98-085B965C81EE}.Debug|x64.ActiveCfg = Debug
+		{8429DEBA-6D14-4E77-9E98-085B965C81EE}.Debug|x86.ActiveCfg = Debug
+		{8429DEBA-6D14-4E77-9E98-085B965C81EE}.Release|Win32.ActiveCfg = Release
+		{8429DEBA-6D14-4E77-9E98-085B965C81EE}.Release|x64.ActiveCfg = Release
+		{8429DEBA-6D14-4E77-9E98-085B965C81EE}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
