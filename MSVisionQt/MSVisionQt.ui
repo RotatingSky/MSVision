@@ -1043,7 +1043,7 @@
                       </size>
                      </property>
                      <property name="text">
-                      <string>内圆中心坐标</string>
+                      <string>外圆中心坐标</string>
                      </property>
                     </widget>
                    </item>
@@ -1088,7 +1088,7 @@
                       </size>
                      </property>
                      <property name="text">
-                      <string>外圆中心坐标</string>
+                      <string>内圆中心坐标</string>
                      </property>
                     </widget>
                    </item>
@@ -1139,7 +1139,7 @@
                       </size>
                      </property>
                      <property name="text">
-                      <string>内圆中心坐标</string>
+                      <string>外圆中心坐标</string>
                      </property>
                     </widget>
                    </item>
@@ -1181,7 +1181,7 @@
                       </size>
                      </property>
                      <property name="text">
-                      <string>外圆中心坐标</string>
+                      <string>内圆中心坐标</string>
                      </property>
                     </widget>
                    </item>
@@ -1234,7 +1234,7 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>平均外圆直径/mm</string>
+                    <string>平均内圆直径/mm</string>
                    </property>
                   </widget>
                  </item>
@@ -1264,7 +1264,7 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>平均内圆直径/mm</string>
+                    <string>平均外圆直径/mm</string>
                    </property>
                   </widget>
                  </item>
