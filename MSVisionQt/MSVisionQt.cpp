@@ -33,7 +33,7 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 	mvMeasureType(Reconstruction),
 	fitMethod(ms::FIT_ELLIPSE_DIRECT),
 	scope(0.75f),
-	kernelSize(3),
+	kernelSize(5),
 	fBilateral(1.0),
 	pointsNum(53),
 	bitAngle(100.0)
@@ -578,7 +578,7 @@ int MSVisionQt::onStreamCB(MV_IMAGE_INFO *pInfo, int index)
 	if (showFlag == true)
 	{
 		drawImgs(-1);
-		cv::waitKey(1000);
+		cv::waitKey(2000);
 		showFlag = false;
 	}
 	else
@@ -890,12 +890,15 @@ void MSVisionQt::on_detect()
 			case ms::MS_IMG_TYPE_ERROR: WARNMSG("Image type error"); break;
 			case ms::MS_DIVIDE_ZERO_ERROR: WARNMSG("Denominator is 0 error"); break;
 			}
+			ui.statusBar->showMessage(u8"¼ì²âÊ§°Ü", 2000);
+			ui.detectBtn->setEnabled(true);
 			return;
 		}
 	}
 	showFlag = true;
 	measure();
 	double eTime = ((double)cv::getTickCount() - sTime) / cv::getTickFrequency();
+	on_saveImg();
 	QString strTime = QString::number(eTime, 10, 3);
 	ui.timeUsed->setText(strTime);
 	ui.statusBar->showMessage(u8"¼ì²â³É¹¦", 2000);

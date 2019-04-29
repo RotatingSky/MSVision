@@ -781,7 +781,7 @@ public:
         spinKernelSize->setMinimum(1);
         spinKernelSize->setMaximum(99);
         spinKernelSize->setSingleStep(2);
-        spinKernelSize->setValue(3);
+        spinKernelSize->setValue(5);
 
         horizontalLayout_19->addWidget(spinKernelSize);
 
@@ -823,7 +823,7 @@ public:
         verticalLayout_13->setObjectName(QString::fromUtf8("verticalLayout_13"));
         straightHole = new QRadioButton(groupBoxHoleType);
         straightHole->setObjectName(QString::fromUtf8("straightHole"));
-        straightHole->setCheckable(false);
+        straightHole->setCheckable(true);
 
         verticalLayout_13->addWidget(straightHole);
 
@@ -882,7 +882,7 @@ public:
 
         checkBoxRestore = new QCheckBox(groupBox_19);
         checkBoxRestore->setObjectName(QString::fromUtf8("checkBoxRestore"));
-        checkBoxRestore->setCheckable(false);
+        checkBoxRestore->setCheckable(true);
 
         verticalLayout_19->addWidget(checkBoxRestore);
 

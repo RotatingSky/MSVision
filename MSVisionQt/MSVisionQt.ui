@@ -838,7 +838,7 @@
                         <number>2</number>
                        </property>
                        <property name="value">
-                        <number>3</number>
+                        <number>5</number>
                        </property>
                       </widget>
                      </item>
@@ -887,7 +887,7 @@
                       <string>单直孔</string>
                      </property>
                      <property name="checkable">
-                      <bool>false</bool>
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
@@ -966,7 +966,7 @@
                       <string>图像离焦复原</string>
                      </property>
                      <property name="checkable">
-                      <bool>false</bool>
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>

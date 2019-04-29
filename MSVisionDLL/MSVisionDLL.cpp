@@ -815,7 +815,7 @@ namespace ms
 			cv::Point curTailPoint = srcCurves[0].back();
 			double curHeadAngle = 0;
 			double curTailAngle = 0;
-			if ((int)srcCurves[0].size() <= segNum)
+			if (static_cast<int>(srcCurves[0].size()) <= segNum)
 			{
 				cv::Point curVec = curTailPoint - curHeadPoint;
 				curHeadAngle = atan2(curVec.y, curVec.x);
@@ -863,7 +863,7 @@ namespace ms
 
 					double tempHeadAngle = 0;
 					double tempTailAngle = 0;
-					if ((int)srcCurves[k].size() <= segNum)
+					if (static_cast<int>(srcCurves[k].size()) <= segNum)
 					{
 						cv::Point tempVec = srcCurves[k].back() - srcCurves[k].front();
 						tempHeadAngle = atan2(tempVec.y, tempVec.x);
@@ -1683,6 +1683,23 @@ namespace ms
 		{
 			return status;
 		}
+#ifdef MS_DEBUG
+		// Show result 0
+		cv::RNG rng(time(0));
+		cv::Mat showImg = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
+		for (size_t k = 0; k < edges.size(); k++)
+		{
+			cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+			for (int e = 0; e < edges[k].size(); e++)
+			{
+				showImg.at<cv::Vec3b>(edges[k][e])[0] = (uchar)color[0];
+				showImg.at<cv::Vec3b>(edges[k][e])[1] = (uchar)color[1];
+				showImg.at<cv::Vec3b>(edges[k][e])[2] = (uchar)color[2];
+			}
+		}
+		cv::imshow("Trace Edge", showImg);
+		cv::waitKey(0);
+#endif
 
 		// Cut at corners
 		std::vector<std::vector<cv::Point>> cutEdges;
@@ -1692,10 +1709,42 @@ namespace ms
 			cutAtCorner(edges[k], segments, segNum);
 			cutEdges.insert(cutEdges.end(), segments.begin(), segments.end());
 		}
+#ifdef MS_DEBUG
+		// Show result 1
+		cv::Mat showImg1 = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
+		for (size_t k = 0; k < cutEdges.size(); k++)
+		{
+			cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+			for (int e = 0; e < cutEdges[k].size(); e++)
+			{
+				showImg1.at<cv::Vec3b>(cutEdges[k][e])[0] = (uchar)color[0];
+				showImg1.at<cv::Vec3b>(cutEdges[k][e])[1] = (uchar)color[1];
+				showImg1.at<cv::Vec3b>(cutEdges[k][e])[2] = (uchar)color[2];
+			}
+		}
+		cv::imshow("Trace Edge", showImg1);
+		cv::waitKey(0);
+#endif
 
 		// Link edges 1
 		std::vector<std::vector<cv::Point>> linkEdges;
 		linkCurves(cutEdges, linkEdges, segNum, distThreshold, angleThreshold);
+#ifdef MS_DEBUG
+		// Show result 2
+		cv::Mat showImg2 = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
+		for (size_t k = 0; k < linkEdges.size(); k++)
+		{
+			cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+			for (int e = 0; e < linkEdges[k].size(); e++)
+			{
+				showImg2.at<cv::Vec3b>(linkEdges[k][e])[0] = (uchar)color[0];
+				showImg2.at<cv::Vec3b>(linkEdges[k][e])[1] = (uchar)color[1];
+				showImg2.at<cv::Vec3b>(linkEdges[k][e])[2] = (uchar)color[2];
+			}
+		}
+		cv::imshow("Trace Edge", showImg2);
+		cv::waitKey(0);
+#endif
 
 		// Remove too small edges
 		std::vector<std::vector<cv::Point>>::iterator itr1 = linkEdges.begin();
@@ -1710,6 +1759,22 @@ namespace ms
 				itr1++;
 			}
 		}
+#ifdef MS_DEBUG
+		// Show result 3
+		cv::Mat showImg3 = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
+		for (size_t k = 0; k < linkEdges.size(); k++)
+		{
+			cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+			for (int e = 0; e < linkEdges[k].size(); e++)
+			{
+				showImg3.at<cv::Vec3b>(linkEdges[k][e])[0] = (uchar)color[0];
+				showImg3.at<cv::Vec3b>(linkEdges[k][e])[1] = (uchar)color[1];
+				showImg3.at<cv::Vec3b>(linkEdges[k][e])[2] = (uchar)color[2];
+			}
+		}
+		cv::imshow("Trace Edge", showImg3);
+		cv::waitKey(0);
+#endif
 
 		// Elliptic cutting
 		std::vector<std::vector<cv::Point>> arcs;
@@ -1719,10 +1784,42 @@ namespace ms
 			ellipticCut(linkEdges[k], segments, segNum, angleThreshold);
 			arcs.insert(arcs.end(), segments.begin(), segments.end());
 		}
+#ifdef MS_DEBUG
+		// Show result 4
+		cv::Mat showImg4 = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
+		for (size_t k = 0; k < arcs.size(); k++)
+		{
+			cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+			for (int e = 0; e < arcs[k].size(); e++)
+			{
+				showImg4.at<cv::Vec3b>(arcs[k][e])[0] = (uchar)color[0];
+				showImg4.at<cv::Vec3b>(arcs[k][e])[1] = (uchar)color[1];
+				showImg4.at<cv::Vec3b>(arcs[k][e])[2] = (uchar)color[2];
+			}
+		}
+		cv::imshow("Trace Edge", showImg);
+		cv::waitKey(0);
+#endif
 
 		// Link edges 2
 		std::vector<std::vector<cv::Point>> linkArcs;
 		linkCurves(arcs, linkArcs, segNum, distThreshold, angleThreshold);
+#ifdef MS_DEBUG
+		// Show result 5
+		cv::Mat showImg5 = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
+		for (size_t k = 0; k < linkArcs.size(); k++)
+		{
+			cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+			for (int e = 0; e < linkArcs[k].size(); e++)
+			{
+				showImg5.at<cv::Vec3b>(linkArcs[k][e])[0] = (uchar)color[0];
+				showImg5.at<cv::Vec3b>(linkArcs[k][e])[1] = (uchar)color[1];
+				showImg5.at<cv::Vec3b>(linkArcs[k][e])[2] = (uchar)color[2];
+			}
+		}
+		cv::imshow("Trace Edge", showImg5);
+		cv::waitKey(0);
+#endif
 
 		// Remove non-elliptic arcs
 		std::vector<std::vector<cv::Point>>::iterator itr2 = linkArcs.begin();
@@ -1737,6 +1834,22 @@ namespace ms
 				itr2++;
 			}
 		}
+#ifdef MS_DEBUG
+		// Show result 6
+		cv::Mat showImg6 = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
+		for (size_t k = 0; k < linkArcs.size(); k++)
+		{
+			cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+			for (int e = 0; e < linkArcs[k].size(); e++)
+			{
+				showImg6.at<cv::Vec3b>(linkArcs[k][e])[0] = (uchar)color[0];
+				showImg6.at<cv::Vec3b>(linkArcs[k][e])[1] = (uchar)color[1];
+				showImg6.at<cv::Vec3b>(linkArcs[k][e])[2] = (uchar)color[2];
+			}
+		}
+		cv::imshow("Trace Edge", showImg6);
+		cv::waitKey(0);
+#endif
 
 		// Group elliptic arcs
 		std::vector<std::vector<cv::Point>> contours;
@@ -1746,6 +1859,22 @@ namespace ms
 		{
 			return MS_GET_ELLIPSE_ERROR;
 		}
+#ifdef MS_DEBUG
+		// Show result 7
+		cv::Mat showImg7 = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
+		for (size_t k = 0; k < contours.size(); k++)
+		{
+			cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+			for (int e = 0; e < contours[k].size(); e++)
+			{
+				showImg7.at<cv::Vec3b>(contours[k][e])[0] = (uchar)color[0];
+				showImg7.at<cv::Vec3b>(contours[k][e])[1] = (uchar)color[1];
+				showImg7.at<cv::Vec3b>(contours[k][e])[2] = (uchar)color[2];
+			}
+		}
+		cv::imshow("Trace Edge", showImg7);
+		cv::waitKey(0);
+#endif
 
 		// Get RotatedRect of contours
 		int count = 0;
@@ -1812,7 +1941,7 @@ namespace ms
 		std::vector<cv::RotatedRect> &rRects,
 		int curveNum = 2,
 		int layerNum = 4,
-		int kernelSize = 3,
+		int kernelSize = 5,
 		double fBilateral = 1.0,
 		int segNum = 10,
 		float distThreshold = 2.f,
@@ -1846,7 +1975,7 @@ namespace ms
 		std::vector<cv::RotatedRect> btmrRects;
 		float delta = 16.f * distThreshold / (btmEdge.cols + btmEdge.rows);
 		int curveSize = 25;
-		double angleThreshold = 15;
+		double angleThreshold = 30.0;
 		status = grabEllipse(
 			btmEdge,
 			btmrRects,
@@ -1855,7 +1984,7 @@ namespace ms
 			segNum,
 			curveSize,
 			angleThreshold,
-			distThreshold * 2.5,
+			distThreshold * 5,
 			fitMethod);
 		if (status != MS_SUCCESS)
 		{
@@ -1908,8 +2037,8 @@ namespace ms
 		rectG[layerNum - 1].height = btmBorder;
 		if ((rectG[layerNum - 1].x < 0) ||
 			(rectG[layerNum - 1].y < 0) ||
-			(rectG[layerNum - 1].x + rectG[3].width >= G[3].cols) ||
-			(rectG[layerNum - 1].y + rectG[3].height >= G[3].rows))
+			(rectG[layerNum - 1].x + rectG[layerNum - 1].width >= G[layerNum - 1].cols) ||
+			(rectG[layerNum - 1].y + rectG[layerNum - 1].height >= G[layerNum - 1].rows))
 		{
 			return MS_ROI_SIZE_ERROR;
 		}
@@ -1919,8 +2048,8 @@ namespace ms
 		roiEdges[layerNum - 1] = btmEdge(rectG[layerNum - 1]);
 
 		// Grab points of ellipses in each layer
-		float rangeThreshold = 4 * sqrt(1 / (btmMaxH * btmMaxH) + 1 / (btmMaxW * btmMaxW)) * distThreshold;
-		float fRange = 2.0;
+		float rangeThreshold = 2 * sqrt(1 / (btmMaxH * btmMaxH) + 1 / (btmMaxW * btmMaxW)) * distThreshold;
+		float fRange = 3.0;
 		std::vector<cv::RotatedRect> temprRects(curveNum);
 		for (size_t k = 0; k < curveNum; k++)
 		{
