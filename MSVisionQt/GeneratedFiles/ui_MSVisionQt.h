@@ -41,20 +41,22 @@ class Ui_MSVisionQtClass
 public:
     QAction *action;
     QWidget *centralWidget;
-    QHBoxLayout *horizontalLayout;
+    QVBoxLayout *verticalLayout_20;
     QVBoxLayout *verticalLayout_12;
     QHBoxLayout *horizontalLayout_17;
     QLabel *label_2;
     QComboBox *comboBoxScale;
     QCheckBox *checkBoxCross;
     QSpacerItem *horizontalSpacer;
-    QHBoxLayout *horizontalLayout_18;
+    QHBoxLayout *horizontalLayoutImgs;
     QScrollArea *scrollAreaL;
     QWidget *scrollAreaWidgetContentsL;
-    QHBoxLayout *horizontalLayoutImgL;
+    QHBoxLayout *horizontalLayout;
+    QHBoxLayout *horizontalLayoutL;
     QScrollArea *scrollAreaR;
     QWidget *scrollAreaWidgetContentsR;
-    QHBoxLayout *horizontalLayoutImgR;
+    QHBoxLayout *horizontalLayout_14;
+    QHBoxLayout *horizontalLayoutR;
     QMenuBar *menuBar;
     QMenu *menu_F;
     QMenu *menu_V;
@@ -224,10 +226,10 @@ public:
         action->setObjectName(QString::fromUtf8("action"));
         centralWidget = new QWidget(MSVisionQtClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
-        horizontalLayout = new QHBoxLayout(centralWidget);
-        horizontalLayout->setSpacing(6);
-        horizontalLayout->setContentsMargins(11, 11, 11, 11);
-        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+        verticalLayout_20 = new QVBoxLayout(centralWidget);
+        verticalLayout_20->setSpacing(6);
+        verticalLayout_20->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_20->setObjectName(QString::fromUtf8("verticalLayout_20"));
         verticalLayout_12 = new QVBoxLayout();
         verticalLayout_12->setSpacing(6);
         verticalLayout_12->setObjectName(QString::fromUtf8("verticalLayout_12"));
@@ -261,57 +263,68 @@ public:
 
         verticalLayout_12->addLayout(horizontalLayout_17);
 
-        horizontalLayout_18 = new QHBoxLayout();
-        horizontalLayout_18->setSpacing(6);
-        horizontalLayout_18->setObjectName(QString::fromUtf8("horizontalLayout_18"));
+        horizontalLayoutImgs = new QHBoxLayout();
+        horizontalLayoutImgs->setSpacing(6);
+        horizontalLayoutImgs->setObjectName(QString::fromUtf8("horizontalLayoutImgs"));
         scrollAreaL = new QScrollArea(centralWidget);
         scrollAreaL->setObjectName(QString::fromUtf8("scrollAreaL"));
-        QSizePolicy sizePolicy1(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        sizePolicy1.setHorizontalStretch(0);
-        sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(scrollAreaL->sizePolicy().hasHeightForWidth());
-        scrollAreaL->setSizePolicy(sizePolicy1);
+        scrollAreaL->setEnabled(true);
+        scrollAreaL->setMinimumSize(QSize(0, 0));
+        scrollAreaL->setMouseTracking(false);
+        scrollAreaL->setAcceptDrops(false);
+        scrollAreaL->setAutoFillBackground(false);
+        scrollAreaL->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
         scrollAreaL->setWidgetResizable(true);
+        scrollAreaL->setAlignment(Qt::AlignCenter);
         scrollAreaWidgetContentsL = new QWidget();
         scrollAreaWidgetContentsL->setObjectName(QString::fromUtf8("scrollAreaWidgetContentsL"));
         scrollAreaWidgetContentsL->setGeometry(QRect(0, 0, 352, 480));
-        sizePolicy.setHeightForWidth(scrollAreaWidgetContentsL->sizePolicy().hasHeightForWidth());
-        scrollAreaWidgetContentsL->setSizePolicy(sizePolicy);
-        horizontalLayoutImgL = new QHBoxLayout(scrollAreaWidgetContentsL);
-        horizontalLayoutImgL->setSpacing(6);
-        horizontalLayoutImgL->setContentsMargins(11, 11, 11, 11);
-        horizontalLayoutImgL->setObjectName(QString::fromUtf8("horizontalLayoutImgL"));
-        horizontalLayoutImgL->setSizeConstraint(QLayout::SetDefaultConstraint);
-        horizontalLayoutImgL->setContentsMargins(0, -1, 0, -1);
+        horizontalLayout = new QHBoxLayout(scrollAreaWidgetContentsL);
+        horizontalLayout->setSpacing(6);
+        horizontalLayout->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+        horizontalLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+        horizontalLayoutL = new QHBoxLayout();
+        horizontalLayoutL->setSpacing(6);
+        horizontalLayoutL->setObjectName(QString::fromUtf8("horizontalLayoutL"));
+        horizontalLayoutL->setSizeConstraint(QLayout::SetDefaultConstraint);
+
+        horizontalLayout->addLayout(horizontalLayoutL);
+
         scrollAreaL->setWidget(scrollAreaWidgetContentsL);
 
-        horizontalLayout_18->addWidget(scrollAreaL);
+        horizontalLayoutImgs->addWidget(scrollAreaL);
 
         scrollAreaR = new QScrollArea(centralWidget);
         scrollAreaR->setObjectName(QString::fromUtf8("scrollAreaR"));
-        sizePolicy1.setHeightForWidth(scrollAreaR->sizePolicy().hasHeightForWidth());
-        scrollAreaR->setSizePolicy(sizePolicy1);
         scrollAreaR->setWidgetResizable(true);
+        scrollAreaR->setAlignment(Qt::AlignCenter);
         scrollAreaWidgetContentsR = new QWidget();
         scrollAreaWidgetContentsR->setObjectName(QString::fromUtf8("scrollAreaWidgetContentsR"));
         scrollAreaWidgetContentsR->setGeometry(QRect(0, 0, 352, 480));
-        sizePolicy.setHeightForWidth(scrollAreaWidgetContentsR->sizePolicy().hasHeightForWidth());
-        scrollAreaWidgetContentsR->setSizePolicy(sizePolicy);
-        horizontalLayoutImgR = new QHBoxLayout(scrollAreaWidgetContentsR);
-        horizontalLayoutImgR->setSpacing(6);
-        horizontalLayoutImgR->setContentsMargins(11, 11, 11, 11);
-        horizontalLayoutImgR->setObjectName(QString::fromUtf8("horizontalLayoutImgR"));
-        horizontalLayoutImgR->setSizeConstraint(QLayout::SetDefaultConstraint);
-        horizontalLayoutImgR->setContentsMargins(0, -1, 0, -1);
+        horizontalLayout_14 = new QHBoxLayout(scrollAreaWidgetContentsR);
+        horizontalLayout_14->setSpacing(6);
+        horizontalLayout_14->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_14->setObjectName(QString::fromUtf8("horizontalLayout_14"));
+        horizontalLayout_14->setSizeConstraint(QLayout::SetDefaultConstraint);
+        horizontalLayout_14->setContentsMargins(0, 0, 0, 0);
+        horizontalLayoutR = new QHBoxLayout();
+        horizontalLayoutR->setSpacing(6);
+        horizontalLayoutR->setObjectName(QString::fromUtf8("horizontalLayoutR"));
+        horizontalLayoutR->setSizeConstraint(QLayout::SetDefaultConstraint);
+
+        horizontalLayout_14->addLayout(horizontalLayoutR);
+
         scrollAreaR->setWidget(scrollAreaWidgetContentsR);
 
-        horizontalLayout_18->addWidget(scrollAreaR);
+        horizontalLayoutImgs->addWidget(scrollAreaR);
 
 
-        verticalLayout_12->addLayout(horizontalLayout_18);
+        verticalLayout_12->addLayout(horizontalLayoutImgs);
 
 
-        horizontalLayout->addLayout(verticalLayout_12);
+        verticalLayout_20->addLayout(verticalLayout_12);
 
         MSVisionQtClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MSVisionQtClass);
@@ -393,11 +406,11 @@ public:
 
         camInfoC1 = new QLineEdit(groupBox_2);
         camInfoC1->setObjectName(QString::fromUtf8("camInfoC1"));
-        QSizePolicy sizePolicy2(QSizePolicy::Preferred, QSizePolicy::Fixed);
-        sizePolicy2.setHorizontalStretch(0);
-        sizePolicy2.setVerticalStretch(0);
-        sizePolicy2.setHeightForWidth(camInfoC1->sizePolicy().hasHeightForWidth());
-        camInfoC1->setSizePolicy(sizePolicy2);
+        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(camInfoC1->sizePolicy().hasHeightForWidth());
+        camInfoC1->setSizePolicy(sizePolicy1);
         camInfoC1->setReadOnly(true);
 
         verticalLayout_3->addWidget(camInfoC1);
@@ -415,8 +428,8 @@ public:
 
         camInfoC2 = new QLineEdit(groupBox_2);
         camInfoC2->setObjectName(QString::fromUtf8("camInfoC2"));
-        sizePolicy2.setHeightForWidth(camInfoC2->sizePolicy().hasHeightForWidth());
-        camInfoC2->setSizePolicy(sizePolicy2);
+        sizePolicy1.setHeightForWidth(camInfoC2->sizePolicy().hasHeightForWidth());
+        camInfoC2->setSizePolicy(sizePolicy1);
         camInfoC2->setReadOnly(true);
 
         verticalLayout_4->addWidget(camInfoC2);
@@ -750,11 +763,11 @@ public:
         detectBtn = new QPushButton(groupBox_15);
         detectBtn->setObjectName(QString::fromUtf8("detectBtn"));
         detectBtn->setEnabled(false);
-        QSizePolicy sizePolicy3(QSizePolicy::Minimum, QSizePolicy::Fixed);
-        sizePolicy3.setHorizontalStretch(0);
-        sizePolicy3.setVerticalStretch(0);
-        sizePolicy3.setHeightForWidth(detectBtn->sizePolicy().hasHeightForWidth());
-        detectBtn->setSizePolicy(sizePolicy3);
+        QSizePolicy sizePolicy2(QSizePolicy::Minimum, QSizePolicy::Fixed);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(detectBtn->sizePolicy().hasHeightForWidth());
+        detectBtn->setSizePolicy(sizePolicy2);
 
         horizontalLayout_22->addWidget(detectBtn);
 
@@ -948,8 +961,8 @@ public:
 
         centerOuterC1 = new QLineEdit(groupBox_20);
         centerOuterC1->setObjectName(QString::fromUtf8("centerOuterC1"));
-        sizePolicy2.setHeightForWidth(centerOuterC1->sizePolicy().hasHeightForWidth());
-        centerOuterC1->setSizePolicy(sizePolicy2);
+        sizePolicy1.setHeightForWidth(centerOuterC1->sizePolicy().hasHeightForWidth());
+        centerOuterC1->setSizePolicy(sizePolicy1);
         centerOuterC1->setMinimumSize(QSize(145, 0));
         centerOuterC1->setMaximumSize(QSize(150, 16777215));
         centerOuterC1->setReadOnly(true);
@@ -970,8 +983,8 @@ public:
 
         centerInnerC1 = new QLineEdit(groupBox_20);
         centerInnerC1->setObjectName(QString::fromUtf8("centerInnerC1"));
-        sizePolicy2.setHeightForWidth(centerInnerC1->sizePolicy().hasHeightForWidth());
-        centerInnerC1->setSizePolicy(sizePolicy2);
+        sizePolicy1.setHeightForWidth(centerInnerC1->sizePolicy().hasHeightForWidth());
+        centerInnerC1->setSizePolicy(sizePolicy1);
         centerInnerC1->setMinimumSize(QSize(145, 0));
         centerInnerC1->setMaximumSize(QSize(150, 16777215));
         centerInnerC1->setReadOnly(true);
@@ -1001,8 +1014,8 @@ public:
 
         centerOuterC2 = new QLineEdit(groupBox_21);
         centerOuterC2->setObjectName(QString::fromUtf8("centerOuterC2"));
-        sizePolicy2.setHeightForWidth(centerOuterC2->sizePolicy().hasHeightForWidth());
-        centerOuterC2->setSizePolicy(sizePolicy2);
+        sizePolicy1.setHeightForWidth(centerOuterC2->sizePolicy().hasHeightForWidth());
+        centerOuterC2->setSizePolicy(sizePolicy1);
         centerOuterC2->setMinimumSize(QSize(145, 0));
         centerOuterC2->setMaximumSize(QSize(150, 16777215));
         centerOuterC2->setReadOnly(true);
@@ -1023,8 +1036,8 @@ public:
 
         centerInnerC2 = new QLineEdit(groupBox_21);
         centerInnerC2->setObjectName(QString::fromUtf8("centerInnerC2"));
-        sizePolicy2.setHeightForWidth(centerInnerC2->sizePolicy().hasHeightForWidth());
-        centerInnerC2->setSizePolicy(sizePolicy2);
+        sizePolicy1.setHeightForWidth(centerInnerC2->sizePolicy().hasHeightForWidth());
+        centerInnerC2->setSizePolicy(sizePolicy1);
         centerInnerC2->setMinimumSize(QSize(145, 0));
         centerInnerC2->setMaximumSize(QSize(150, 16777215));
         centerInnerC2->setReadOnly(true);

@@ -1027,6 +1027,10 @@ namespace ms
 						maxDist = distance;
 						maxDistIndex = k;
 					}
+					else
+					{
+						maxDistIndex = curIndex;
+					}
 				}
 				std::vector<cv::Point> segTemp(curve.begin() + lastIndex, curve.begin() + maxDistIndex);
 				curves.push_back(segTemp);
@@ -1697,6 +1701,7 @@ namespace ms
 				showImg.at<cv::Vec3b>(edges[k][e])[2] = (uchar)color[2];
 			}
 		}
+		cv::putText(showImg, "figure 1", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
 		cv::imshow("Trace Edge", showImg);
 		cv::waitKey(0);
 #endif
@@ -1722,6 +1727,7 @@ namespace ms
 				showImg1.at<cv::Vec3b>(cutEdges[k][e])[2] = (uchar)color[2];
 			}
 		}
+		cv::putText(showImg1, "figure 2", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
 		cv::imshow("Trace Edge", showImg1);
 		cv::waitKey(0);
 #endif
@@ -1742,6 +1748,7 @@ namespace ms
 				showImg2.at<cv::Vec3b>(linkEdges[k][e])[2] = (uchar)color[2];
 			}
 		}
+		cv::putText(showImg2, "figure 2", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
 		cv::imshow("Trace Edge", showImg2);
 		cv::waitKey(0);
 #endif
@@ -1772,6 +1779,7 @@ namespace ms
 				showImg3.at<cv::Vec3b>(linkEdges[k][e])[2] = (uchar)color[2];
 			}
 		}
+		cv::putText(showImg3, "figure 3", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
 		cv::imshow("Trace Edge", showImg3);
 		cv::waitKey(0);
 #endif
@@ -1797,7 +1805,8 @@ namespace ms
 				showImg4.at<cv::Vec3b>(arcs[k][e])[2] = (uchar)color[2];
 			}
 		}
-		cv::imshow("Trace Edge", showImg);
+		cv::putText(showImg4, "figure 4", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::imshow("Trace Edge", showImg4);
 		cv::waitKey(0);
 #endif
 
@@ -1817,6 +1826,7 @@ namespace ms
 				showImg5.at<cv::Vec3b>(linkArcs[k][e])[2] = (uchar)color[2];
 			}
 		}
+		cv::putText(showImg5, "figure 5", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
 		cv::imshow("Trace Edge", showImg5);
 		cv::waitKey(0);
 #endif
@@ -1847,6 +1857,7 @@ namespace ms
 				showImg6.at<cv::Vec3b>(linkArcs[k][e])[2] = (uchar)color[2];
 			}
 		}
+		cv::putText(showImg6, "figure 6", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
 		cv::imshow("Trace Edge", showImg6);
 		cv::waitKey(0);
 #endif
@@ -1872,6 +1883,7 @@ namespace ms
 				showImg7.at<cv::Vec3b>(contours[k][e])[2] = (uchar)color[2];
 			}
 		}
+		cv::putText(showImg7, "figure 7", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
 		cv::imshow("Trace Edge", showImg7);
 		cv::waitKey(0);
 #endif
@@ -1960,14 +1972,14 @@ namespace ms
 		{
 			cv::pyrDown(G[l], G[l + 1], cv::Size(G[l].cols / 2, G[l].rows / 2));
 		}
-
+		
 		// Parameters for image process
 		double ffB = 2.0;
 
 		// Detect ellipses in bottom layer
 		MSInfoCode status;
 		cv::Mat btmEdge;
-		status = preprocess(G[layerNum - 1], btmEdge, kernelSize, fBilateral, MS_GREEN | MS_RED);
+		status = preprocess(G[layerNum - 1], btmEdge, kernelSize, fBilateral, MS_BLUE | MS_RED);
 		if (status != MS_SUCCESS)
 		{
 			return status;
@@ -2046,6 +2058,7 @@ namespace ms
 		std::vector<cv::Mat> roiEdges(layerNum);
 		roiG[layerNum - 1] = G[layerNum - 1](rectG[layerNum - 1]);
 		roiEdges[layerNum - 1] = btmEdge(rectG[layerNum - 1]);
+		
 
 		// Grab points of ellipses in each layer
 		float rangeThreshold = 2 * sqrt(1 / (btmMaxH * btmMaxH) + 1 / (btmMaxW * btmMaxW)) * distThreshold;
@@ -2069,7 +2082,7 @@ namespace ms
 				rectG[l].height = rectG[l + 1].height * 2;
 				roiG[l] = G[l](rectG[l]);
 				fBilateral *= ffB;
-				status = preprocess(roiG[l], roiEdges[l], kernelSize, fBilateral, MS_GREEN | MS_RED);
+				status = preprocess(roiG[l], roiEdges[l], kernelSize, fBilateral, MS_BLUE | MS_RED);
 				if (status != MS_SUCCESS)
 				{
 					return status;

@@ -27,7 +27,7 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 	loadFlag(false),
 	sharpFlag(true),
 	restoreFlag(false),
-	showFlag(false),
+	showFlag(true),
 	lightChannel(ms::LIGHT_CHANNEL1),
 	mvHoleType(CountersinkHole),
 	mvMeasureType(Reconstruction),
@@ -41,8 +41,8 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 	ui.setupUi(this);
 
 	// Initialize gui of images
-	ui.horizontalLayoutImgL->addWidget(&labelImgL);
-	ui.horizontalLayoutImgR->addWidget(&labelImgR);
+	ui.horizontalLayoutL->addWidget(&labelImgL);
+	ui.horizontalLayoutR->addWidget(&labelImgR);
 	labelImgL.setText("Image 1");
 	labelImgR.setText("Image 2");
 
@@ -191,8 +191,8 @@ void MSVisionQt::drawImgs(int index)
 	}
 	else
 	{
-		wImg = ui.scrollAreaL->width();
-		hImg = ui.scrollAreaL->height();
+		wImg = ui.scrollAreaL->width() - 2;
+		hImg = ui.scrollAreaR->height() - 2;
 	}
 	// Draw images in labels
 	QImage showImgs[ms::CamsNum];
@@ -320,6 +320,7 @@ ms::MSInfoCode MSVisionQt::detectImg(int index)
 	}
 	// Grab ellipses from image and draw
 	ms::MSInfoCode status;
+	int flag = -1;
 	status = ms::pyrEllipse(tempImg, rRects[index], rRectsNum, 4, kernelSize, fBilateral, 10, 2.f, fitMethod);
 	if (status != ms::MS_SUCCESS)
 	{
@@ -418,19 +419,19 @@ void MSVisionQt::measure()
 		ui.delta->setText(strDelta);
 		ui.deep->setText(strDeep);
 
-		// Save parameters of the countersink hole
-		if (saveHoleParamsPath == "")
-		{
-			saveHoleParamsPath = QFileDialog::getSaveFileName(
-				this,
-				tr(u8"保存文件"),
-				tr(""),
-				tr(u8"YML文件(*.yml);;XML文件(*.xml)"));
-		}
-		if (!saveHoleParamsPath.isNull())
-		{
-			ms::saveHoleParameters(saveHoleParamsPath.toStdString(), xyzs, diameters, delta, deep);
-		}
+		//// Save parameters of the countersink hole
+		//if (saveHoleParamsPath == "")
+		//{
+		//	saveHoleParamsPath = QFileDialog::getSaveFileName(
+		//		this,
+		//		tr(u8"保存文件"),
+		//		tr(""),
+		//		tr(u8"YML文件(*.yml);;XML文件(*.xml)"));
+		//}
+		//if (!saveHoleParamsPath.isNull())
+		//{
+		//	ms::saveHoleParameters(saveHoleParamsPath.toStdString(), xyzs, diameters, delta, deep);
+		//}
 	}
 	else if (mvHoleType == StraightHole)
 	{
@@ -467,9 +468,9 @@ void MSVisionQt::measure()
 			QString::number(xyzs[1].y, 10, 3) + "," +
 			QString::number(xyzs[1].z, 10, 3) + "]";
 		QString strD = QString::number(diameter, 10, 3);
-		ui.centerOuterC1->setText(xyzStrC1);
-		ui.centerOuterC2->setText(xyzStrC2);
-		ui.outerDiameter->setText(strD);
+		ui.centerInnerC1->setText(xyzStrC1);
+		ui.centerInnerC2->setText(xyzStrC2);
+		ui.innerDiameter->setText(strD);
 	}
 }
 
@@ -575,13 +576,7 @@ int MSVisionQt::onStreamCB(MV_IMAGE_INFO *pInfo, int index)
 		MVBayerToRGB(mvCamHandles[index], pInfo->pImageBuffer, mvImgs[index].GetBits(), mvImgs[index].GetPitch(), w, h, mvPixelFormats[index]);
 		qtImgs[index] = QImage((uchar*)(mvImgs[index].GetBits()), mvImgs[index].GetWidth(), mvImgs[index].GetHeight(), QImage::Format_RGB888);
 	}
-	if (showFlag == true)
-	{
-		drawImgs(-1);
-		cv::waitKey(2000);
-		showFlag = false;
-	}
-	else
+	if (showFlag)
 	{
 		drawImgs(index);
 	}
@@ -869,7 +864,7 @@ void MSVisionQt::on_detect()
 	cv::waitKey(1);
 	for (int i = 0; i < ms::CamsNum; i++)
 	{
-		MVSetTriggerMode(mvCamHandles[0], TriggerMode_On);
+		MVSetTriggerMode(mvCamHandles[i], TriggerMode_On);
 	}
 	sTime = (double)cv::getTickCount();
 	ms::MSInfoCode status;
@@ -895,16 +890,21 @@ void MSVisionQt::on_detect()
 			return;
 		}
 	}
-	showFlag = true;
+	// Show result
+	showFlag = false;
+	drawImgs(-1);
 	measure();
 	double eTime = ((double)cv::getTickCount() - sTime) / cv::getTickFrequency();
+	// Save the images
 	on_saveImg();
 	QString strTime = QString::number(eTime, 10, 3);
 	ui.timeUsed->setText(strTime);
 	ui.statusBar->showMessage(u8"检测成功", 2000);
+	cv::waitKey(2000);
+	showFlag = true;
 	for (int i = 0; i < ms::CamsNum; i++)
 	{
-		MVSetTriggerMode(mvCamHandles[0], TriggerMode_Off);
+		MVSetTriggerMode(mvCamHandles[i], TriggerMode_Off);
 	}
 	ui.detectBtn->setEnabled(true);
 }

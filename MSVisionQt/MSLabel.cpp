@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "MSLabel.h"
 
-
 MSLabel::MSLabel(QWidget *parent)
 	: QLabel(parent),
 	showFlag(false)
