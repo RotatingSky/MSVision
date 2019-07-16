@@ -151,6 +151,9 @@ public:
     QHBoxLayout *horizontalLayout_19;
     QLabel *label_18;
     QSpinBox *spinKernelSize;
+    QHBoxLayout *horizontalLayout_29;
+    QLabel *label_21;
+    QDoubleSpinBox *doubleSpinGamma;
     QHBoxLayout *horizontalLayout_20;
     QLabel *label_19;
     QDoubleSpinBox *doubleSpinBilateral;
@@ -216,7 +219,7 @@ public:
     {
         if (MSVisionQtClass->objectName().isEmpty())
             MSVisionQtClass->setObjectName(QString::fromUtf8("MSVisionQtClass"));
-        MSVisionQtClass->resize(1300, 577);
+        MSVisionQtClass->resize(1300, 605);
         QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -278,7 +281,7 @@ public:
         scrollAreaL->setAlignment(Qt::AlignCenter);
         scrollAreaWidgetContentsL = new QWidget();
         scrollAreaWidgetContentsL->setObjectName(QString::fromUtf8("scrollAreaWidgetContentsL"));
-        scrollAreaWidgetContentsL->setGeometry(QRect(0, 0, 352, 480));
+        scrollAreaWidgetContentsL->setGeometry(QRect(0, 0, 352, 508));
         horizontalLayout = new QHBoxLayout(scrollAreaWidgetContentsL);
         horizontalLayout->setSpacing(6);
         horizontalLayout->setContentsMargins(11, 11, 11, 11);
@@ -302,7 +305,7 @@ public:
         scrollAreaR->setAlignment(Qt::AlignCenter);
         scrollAreaWidgetContentsR = new QWidget();
         scrollAreaWidgetContentsR->setObjectName(QString::fromUtf8("scrollAreaWidgetContentsR"));
-        scrollAreaWidgetContentsR->setGeometry(QRect(0, 0, 352, 480));
+        scrollAreaWidgetContentsR->setGeometry(QRect(0, 0, 352, 508));
         horizontalLayout_14 = new QHBoxLayout(scrollAreaWidgetContentsR);
         horizontalLayout_14->setSpacing(6);
         horizontalLayout_14->setContentsMargins(11, 11, 11, 11);
@@ -343,7 +346,7 @@ public:
         dockWidget->setObjectName(QString::fromUtf8("dockWidget"));
         sizePolicy.setHeightForWidth(dockWidget->sizePolicy().hasHeightForWidth());
         dockWidget->setSizePolicy(sizePolicy);
-        dockWidget->setMinimumSize(QSize(560, 532));
+        dockWidget->setMinimumSize(QSize(560, 560));
         dockWidgetContents = new QWidget();
         dockWidgetContents->setObjectName(QString::fromUtf8("dockWidgetContents"));
         verticalLayout = new QVBoxLayout(dockWidgetContents);
@@ -801,6 +804,27 @@ public:
 
         verticalLayout_17->addLayout(horizontalLayout_19);
 
+        horizontalLayout_29 = new QHBoxLayout();
+        horizontalLayout_29->setSpacing(6);
+        horizontalLayout_29->setObjectName(QString::fromUtf8("horizontalLayout_29"));
+        label_21 = new QLabel(groupBox_16);
+        label_21->setObjectName(QString::fromUtf8("label_21"));
+
+        horizontalLayout_29->addWidget(label_21);
+
+        doubleSpinGamma = new QDoubleSpinBox(groupBox_16);
+        doubleSpinGamma->setObjectName(QString::fromUtf8("doubleSpinGamma"));
+        doubleSpinGamma->setMaximumSize(QSize(50, 16777215));
+        doubleSpinGamma->setMinimum(0.100000000000000);
+        doubleSpinGamma->setMaximum(3.000000000000000);
+        doubleSpinGamma->setSingleStep(0.050000000000000);
+        doubleSpinGamma->setValue(0.750000000000000);
+
+        horizontalLayout_29->addWidget(doubleSpinGamma);
+
+
+        verticalLayout_17->addLayout(horizontalLayout_29);
+
         horizontalLayout_20 = new QHBoxLayout();
         horizontalLayout_20->setSpacing(6);
         horizontalLayout_20->setObjectName(QString::fromUtf8("horizontalLayout_20"));
@@ -862,13 +886,13 @@ public:
 
         radioButtonB2AC = new QRadioButton(groupBoxFit);
         radioButtonB2AC->setObjectName(QString::fromUtf8("radioButtonB2AC"));
-        radioButtonB2AC->setChecked(true);
+        radioButtonB2AC->setChecked(false);
 
         verticalLayout_18->addWidget(radioButtonB2AC);
 
         radioButtonRANSAC = new QRadioButton(groupBoxFit);
         radioButtonRANSAC->setObjectName(QString::fromUtf8("radioButtonRANSAC"));
-        radioButtonRANSAC->setChecked(false);
+        radioButtonRANSAC->setChecked(true);
 
         verticalLayout_18->addWidget(radioButtonRANSAC);
 
@@ -1157,12 +1181,12 @@ public:
 
         verticalLayout_26->addWidget(groupBox_11);
 
-        verticalSpacer_3 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-
-        verticalLayout_26->addItem(verticalSpacer_3);
-
 
         verticalLayout_10->addWidget(groupBox_10);
+
+        verticalSpacer_3 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+        verticalLayout_10->addItem(verticalSpacer_3);
 
         tabWidget->addTab(tab_measure, QString());
 
@@ -1258,6 +1282,7 @@ public:
         detectBtn->setText(QApplication::translate("MSVisionQtClass", "\345\274\200\345\247\213\346\265\213\351\207\217", nullptr));
         groupBox_16->setTitle(QApplication::translate("MSVisionQtClass", "\351\242\204\345\244\204\347\220\206\345\217\202\346\225\260", nullptr));
         label_18->setText(QApplication::translate("MSVisionQtClass", "\351\253\230\346\226\257\346\273\244\346\263\242\346\240\270\345\260\272\345\257\270", nullptr));
+        label_21->setText(QApplication::translate("MSVisionQtClass", "\344\274\275\351\251\254\345\217\230\346\215\242\345\217\202\346\225\260", nullptr));
         label_19->setText(QApplication::translate("MSVisionQtClass", "\345\217\214\350\276\271\346\273\244\346\263\242\345\217\202\346\225\260", nullptr));
         groupBoxHoleType->setTitle(QApplication::translate("MSVisionQtClass", "\345\255\224\347\261\273\345\236\213", nullptr));
         straightHole->setText(QApplication::translate("MSVisionQtClass", "\345\215\225\347\233\264\345\255\224", nullptr));

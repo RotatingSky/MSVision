@@ -438,7 +438,9 @@ namespace ms
 		const cv::Mat &src,
 		cv::Mat &dst,
 		int kernelSize,
+		double fGamma,
 		double fBilateral,
+		double fCanny,
 		int channelsFlag)
 	{
 		// Check parmeters
@@ -455,19 +457,23 @@ namespace ms
 		if (src.channels() == 3)
 		{
 			// Merge the edge images
+			cv::Mat gammaImg;
+			imgGammaTrans(src, gammaImg, fGamma);
 			std::vector<cv::Mat> bgrChannels(3);
-			cv::split(src, bgrChannels);
+			cv::split(gammaImg, bgrChannels);
 			std::vector<cv::Mat> filterImgs(3);
+			std::vector<cv::Mat> bilateralImgs(3);
 			std::vector<cv::Mat> midImgs(3);
 			std::vector<cv::Mat> edgeImgs(3);
 			for (int k = 0; k < 3; k++)
 			{
-				cv::GaussianBlur(bgrChannels[k], filterImgs[k], cv::Size(kernelSize, kernelSize), 0, 0);
+				//cv::GaussianBlur(bgrChannels[k], filterImgs[k], cv::Size(kernelSize, kernelSize), 0, 0);
+				cv::medianBlur(bgrChannels[k], filterImgs[k], kernelSize);
 				cv::bilateralFilter(filterImgs[k], midImgs[k], static_cast<int>(fBilateral), fBilateral * 2, fBilateral / 2);
 				double threshold1 = 0;
 				double threshold2 = 0;
 				getThresholds(midImgs[k], threshold1, threshold2);
-				cv::Canny(midImgs[k], edgeImgs[k], threshold1, threshold2);
+				cv::Canny(midImgs[k], edgeImgs[k], threshold1 / fCanny, threshold2);
 			}
 #ifdef MS_DEBUG
 			cv::imshow("bImg", edgeImgs[0]);
@@ -528,12 +534,17 @@ namespace ms
 			// Get edge image
 			cv::Mat filterImg;
 			cv::Mat midImg;
-			cv::GaussianBlur(src, filterImg, cv::Size(kernelSize, kernelSize), 0, 0);
+			//cv::GaussianBlur(src, filterImg, cv::Size(kernelSize, kernelSize), 0, 0);
+			cv::medianBlur(src, filterImg, kernelSize);
 			cv::bilateralFilter(filterImg, midImg, static_cast<int>(fBilateral), fBilateral * 2, fBilateral / 2);
 			double threshold1 = 0;
 			double threshold2 = 0;
 			getThresholds(midImg, threshold1, threshold2);
 			cv::Canny(midImg, dst, threshold1, threshold2);
+#ifdef MS_DEBUG
+			cv::imshow("Edge", dst);
+			cv::waitKey(0);
+#endif
 		}
 		else
 		{
@@ -555,17 +566,17 @@ namespace ms
 		}
 
 		// Parameters of the ellipse
-		float cosA = (float)cos(rRect.angle / 180 * CV_PI);
-		float sinA = (float)sin(rRect.angle / 180 * CV_PI);
-		float a = rRect.size.height / 2;
-		float b = rRect.size.width / 2;
+		float cosA = (float)cos(rRect.angle * CV_PI / 180.f);
+		float sinA = (float)sin(rRect.angle * CV_PI / 180.f);
+		float a = rRect.size.height / 2.f;
+		float b = rRect.size.width / 2.f;
 
 		// Record the index of compatible point
 		for (size_t i = 0; i < points.size(); ++i)
 		{
-			float x = (points[i].x - rRect.center.x) * sinA - (points[i].y - rRect.center.y) * cosA;
-			float y = (points[i].x - rRect.center.x) * cosA + (points[i].y - rRect.center.y) * sinA;
-			float distance = pow(x / a, 2) + pow(y / b, 2) - 1;
+			float x = (points[i].y - rRect.center.y) * sinA + (points[i].x - rRect.center.x) * cosA;
+			float y = (points[i].y - rRect.center.y) * cosA - (points[i].x - rRect.center.x) * sinA;
+			float distance = pow(x / b, 2) + pow(y / a, 2) - 1.f;
 			if (abs(distance) < delta)
 			{
 				coIndexes.push_back((int)i);
@@ -586,8 +597,8 @@ namespace ms
 		}
 
 		// Parameters of the ellipse
-		float cosA = (float)cos(rRect.angle / 180.f * CV_PI);
-		float sinA = (float)sin(rRect.angle / 180.f * CV_PI);
+		float cosA = (float)cos(rRect.angle * CV_PI / 180.f);
+		float sinA = (float)sin(rRect.angle * CV_PI / 180.f);
 		float a = rRect.size.height / 2.f;
 		float b = rRect.size.width / 2.f;
 
@@ -599,9 +610,9 @@ namespace ms
 			{
 				if (pSrc[i] > 127)
 				{
-					float x = (i - rRect.center.x) * sinA - (j - rRect.center.y) * cosA;
-					float y = (i - rRect.center.x) * cosA + (j - rRect.center.y) * sinA;
-					float distance = pow(x / a, 2) + pow(y / b, 2) - 1.f;
+					float x = (j - rRect.center.y) * sinA + (i - rRect.center.x) * cosA;
+					float y = (j - rRect.center.y) * cosA - (i - rRect.center.x) * sinA;
+					float distance = pow(x / b, 2) + pow(y / a, 2) - 1.f;
 					if (abs(distance) < delta)
 					{
 						coPoints.push_back(cv::Point(i, j));
@@ -617,8 +628,8 @@ namespace ms
 		float delta)
 	{
 		// Parameters of the ellipse
-		float cosA = (float)cos(rRect.angle / 180.f * CV_PI);
-		float sinA = (float)sin(rRect.angle / 180.f * CV_PI);
+		float cosA = (float)cos(rRect.angle * CV_PI / 180.f);
+		float sinA = (float)sin(rRect.angle * CV_PI / 180.f);
 		float a = rRect.size.height / 2.f;
 		float b = rRect.size.width / 2.f;
 
@@ -626,9 +637,9 @@ namespace ms
 		int pointNum = 0;
 		for (size_t i = 0; i < points.size(); i++)
 		{
-			float x = (points[i].x - rRect.center.x) * sinA - (points[i].y - rRect.center.y) * cosA;
-			float y = (points[i].x - rRect.center.x) * cosA + (points[i].y - rRect.center.y) * sinA;
-			float distance = pow(x / a, 2) + pow(y / b, 2) - 1.f;
+			float x = (points[i].y - rRect.center.y) * sinA + (points[i].x - rRect.center.x) * cosA;
+			float y = (points[i].y - rRect.center.y) * cosA - (points[i].x - rRect.center.x) * sinA;
+			float distance = pow(x / b, 2) + pow(y / a, 2) - 1.f;
 			if (abs(distance) < delta)
 			{
 				pointNum++;
@@ -794,7 +805,7 @@ namespace ms
 		std::vector<std::vector<cv::Point>> &dstCurves,
 		int segNum = 10,
 		double distThreshold = 5.0,
-		double angleThreshold = 15)
+		double angleThreshold = 15.0)
 	{
 		// Check parameters
 		if (segNum <= 1)
@@ -879,36 +890,62 @@ namespace ms
 
 					if (dbDistChTt < dbDistThreshold || dbDistChTh < dbDistThreshold)
 					{
-						double diffAngleTtCh = curHeadAngle - tempTailAngle;
-						if (diffAngleTtCh < -CV_PI)
+						cv::Point linkVec = curHeadPoint - srcCurves[k].back();
+						double linkAngle = atan2(linkVec.y, linkVec.x);
+						//double diffAngleTtCh = curHeadAngle - tempTailAngle;
+						double curvCh = curHeadAngle - linkAngle;
+						double curvTt = linkAngle - tempTailAngle;
+						if (curvCh < -CV_PI)
 						{
-							diffAngleTtCh += 2 * CV_PI;
+							curvCh += 2 * CV_PI;
 						}
-						else if (diffAngleTtCh > CV_PI)
+						else if (curvCh > CV_PI)
 						{
-							diffAngleTtCh -= 2 * CV_PI;
+							curvCh -= 2 * CV_PI;
 						}
-						if (abs(diffAngleTtCh) < curvThreshold && abs(diffAngleTtCh) < minHeadCurv)
+						if (curvTt < -CV_PI)
 						{
-							minHeadCurv = abs(diffAngleTtCh);
+							curvTt += 2 * CV_PI;
+						}
+						else if (curvTt > CV_PI)
+						{
+							curvTt -= 2 * CV_PI;
+						}
+						double maxTtCh = MAX(abs(curvCh), abs(curvTt));
+						if (abs(curvCh) < curvThreshold && abs(curvTt) < curvThreshold && maxTtCh < minHeadCurv)
+						{
+							minHeadCurv = abs(maxTtCh);
 							bestHeadIndex = (int)k;
 							bestHeadAngle = tempHeadAngle;
 						}
 					}
 					if (dbDistCtTh < dbDistThreshold || dbDistCtTt < dbDistThreshold)
 					{
-						double diffAngleCtTh = tempHeadAngle - curTailAngle;
-						if (diffAngleCtTh < -CV_PI)
+						cv::Point linkVec = srcCurves[k].front() - curHeadPoint;
+						double linkAngle = atan2(linkVec.y, linkVec.x);
+						//double diffAngleCtTh = tempHeadAngle - curTailAngle;
+						double curvTh = tempHeadAngle - linkAngle;
+						double curvCt = linkAngle - curTailAngle;
+						if (curvTh < -CV_PI)
 						{
-							diffAngleCtTh += 2 * CV_PI;
+							curvTh += 2 * CV_PI;
 						}
-						else if (diffAngleCtTh > CV_PI)
+						else if (curvTh > CV_PI)
 						{
-							diffAngleCtTh -= 2 * CV_PI;
+							curvTh -= 2 * CV_PI;
 						}
-						if (abs(diffAngleCtTh) < curvThreshold && abs(diffAngleCtTh) < minTailCurv)
+						if (curvCt < -CV_PI)
 						{
-							minTailCurv = abs(diffAngleCtTh);
+							curvCt += 2 * CV_PI;
+						}
+						else if (curvCt > CV_PI)
+						{
+							curvCt -= 2 * CV_PI;
+						}
+						double maxCtTh = MAX(abs(curvTh), abs(curvCt));
+						if (abs(curvTh) < curvThreshold && abs(curvCt) < curvThreshold && abs(maxCtTh) < minTailCurv)
+						{
+							minTailCurv = abs(maxCtTh);
 							bestTailIndex = (int)k;
 							bestTailAngle = tempTailAngle;
 						}
@@ -965,7 +1002,7 @@ namespace ms
 		const std::vector<cv::Point> &curve,
 		std::vector<std::vector<cv::Point>> &curves,
 		int segNum = 10,
-		double angleThreshold = 25.0)
+		double angleThreshold = 15.0)
 	{
 		// Check paramters
 		if (segNum <= 1)
@@ -981,7 +1018,9 @@ namespace ms
 		int lastIndex = 0;
 		int curIndex = segNum;
 		int sign = -1;
+		int index = 0;
 		int curveSize = static_cast<int>(curve.size());
+		std::vector<std::vector<cv::Point>> tempCurves(2);
 		while (curIndex + segNum < curveSize)
 		{
 			// Compute curvature of two segments
@@ -1020,29 +1059,32 @@ namespace ms
 				int maxDistIndex = -1;
 				for (int k = beforeIndex + 1; k < afterIndex; k++)
 				{
-					cv::Point curVec = curve[k] - curve[beforeIndex];
-					double distance = abs(curVec.y * cosTheta - curVec.x * sinTheta);
+					cv::Point tempVec = curve[k] - curve[beforeIndex];
+					double distance = abs(tempVec.y * cosTheta - tempVec.x * sinTheta);
 					if (distance > maxDist)
 					{
 						maxDist = distance;
 						maxDistIndex = k;
 					}
-					else
-					{
-						maxDistIndex = curIndex;
-					}
 				}
-				std::vector<cv::Point> segTemp(curve.begin() + lastIndex, curve.begin() + maxDistIndex);
-				curves.push_back(segTemp);
+				if (maxDistIndex < 0)
+				{
+					maxDistIndex = curIndex;
+				}
+				//std::vector<cv::Point> segTemp(curve.begin() + lastIndex, curve.begin() + maxDistIndex);
+				//curves.push_back(segTemp);
+				tempCurves[index].insert(tempCurves[index].end(), curve.begin() + lastIndex, curve.begin() + maxDistIndex);
 				lastIndex = maxDistIndex;
 				curIndex = lastIndex + segNum;
 			}
 			else if (signFlag)
 			{
-				std::vector<cv::Point> segTemp(curve.begin() + lastIndex, curve.begin() + curIndex);
-				curves.push_back(segTemp);
+				//std::vector<cv::Point> segTemp(curve.begin() + lastIndex, curve.begin() + curIndex);
+				//curves.push_back(segTemp);
+				tempCurves[index].insert(tempCurves[index].end(), curve.begin() + lastIndex, curve.begin() + curIndex);
 				lastIndex = curIndex;
 				curIndex = lastIndex + segNum;
+				index = 1 - index;
 			}
 			else
 			{
@@ -1052,9 +1094,97 @@ namespace ms
 
 		if (lastIndex < curveSize)
 		{
-			std::vector<cv::Point> segTemp(curve.begin() + lastIndex, curve.end());
-			curves.push_back(segTemp);
+			//std::vector<cv::Point> segTemp(curve.begin() + lastIndex, curve.end());
+			//curves.push_back(segTemp);
+			tempCurves[index].insert(tempCurves[index].end(), curve.begin() + lastIndex, curve.end());
 		}
+		for (size_t i = 0; i < tempCurves.size(); i++)
+		{
+			if (!tempCurves[i].empty())
+			{
+				curves.push_back(tempCurves[i]);
+			}
+		}
+	}
+
+	static bool isElliptic(
+		const std::vector<cv::Point> &curve,
+		int segNum = 10,
+		double angleThreshold = 3.0)
+	{
+		// Check paramters
+		if (segNum <= 1)
+		{
+			segNum = 10;
+		}
+
+		double sumCurvature = 0;
+		int count = 0;
+		size_t curIndex = segNum;
+		size_t curveSize = curve.size();
+		while (curIndex + segNum < curveSize)
+		{
+			size_t beforeIndex = curIndex - segNum;
+			size_t afterIndex = curIndex + segNum;
+			cv::Point curVec = curve[curIndex] - curve[beforeIndex];
+			cv::Point nextVec = curve[afterIndex] - curve[curIndex];
+			double curAngle = atan2(curVec.y, curVec.x);
+			double nextAngle = atan2(nextVec.y, nextVec.x);
+			double curvature = nextAngle - curAngle;
+			if (curvature < -CV_PI)
+			{
+				curvature += 2 * CV_PI;
+			}
+			else if (curvature > CV_PI)
+			{
+				curvature -= 2 * CV_PI;
+			}
+			sumCurvature += curvature;
+			count++;
+			curIndex += segNum;
+		}
+		if (curIndex < curveSize)
+		{
+			size_t beforeIndex = curIndex - segNum;
+			size_t afterIndex = curveSize - 1;
+			cv::Point curVec = curve[curIndex] - curve[beforeIndex];
+			cv::Point nextVec = curve[afterIndex] - curve[curIndex];
+			double curAngle = atan2(curVec.y, curVec.x);
+			double nextAngle = atan2(nextVec.y, nextVec.x);
+			double curvature = nextAngle - curAngle;
+			if (curvature < -CV_PI)
+			{
+				curvature += 2 * CV_PI;
+			}
+			else if (curvature > CV_PI)
+			{
+				curvature -= 2 * CV_PI;
+			}
+			sumCurvature += curvature;
+			count++;
+		}
+		double aveAngle = abs(sumCurvature / count) * 180 / CV_PI;
+		if (aveAngle < angleThreshold || aveAngle > 35.0)
+		{
+			return false;
+		}
+
+		/*size_t midIndex = curve.size() / 2;
+		cv::Point vec1 = curve.front() - curve[midIndex];
+		cv::Point vec2 = curve.back() - curve[midIndex];
+		double magVec1 = sqrt(vec1.ddot(vec1));
+		double magVec2 = sqrt(vec2.ddot(vec2));
+		double alpha = 0;
+		if (magVec1 > 0 && magVec2 > 0)
+		{
+			alpha = acos(vec1.ddot(vec2) / (magVec1*magVec2)) * 180 / CV_PI;
+		}
+		if (alpha < 30.0 || alpha > 175.0)
+		{
+			return false;
+		}*/
+
+		return true;
 	}
 
 	static double computeSimilarity(
@@ -1075,7 +1205,7 @@ namespace ms
 			double rate2 = (double)fitNum2 / static_cast<double>(arcs2.size());
 			if (rate1 > rateThreshold && rate2 > rateThreshold)
 			{
-				return (rate1 * rate2);
+				return (rate1 + rate2);
 			}
 		}
 		return 0;
@@ -1157,6 +1287,11 @@ namespace ms
 		}
 
 		// Clustering
+		int sumPointsNum = 0;
+		for (size_t i = 0; i < srcCurves.size(); i++)
+		{
+			sumPointsNum += static_cast<int>(srcCurves[i].size());
+		}
 		int curClustNum = static_cast<int>(srcCurves.size());
 		while (curClustNum > clusterNum)
 		{
@@ -1168,9 +1303,10 @@ namespace ms
 				for (int j = i + 1; j < static_cast<int>(srcCurves.size()); j++)
 				{
 					double curSimilarity = computeSimilarity(srcCurves[i], srcCurves[j], delta, highRateThreshold);
-					if (curSimilarity > maxSimilarity)
+					double weight = static_cast<double>(srcCurves[i].size() + srcCurves[j].size()) / sumPointsNum;
+					if (curSimilarity * weight > maxSimilarity)
 					{
-						maxSimilarity = curSimilarity;
+						maxSimilarity = curSimilarity * weight;
 						index1 = i;
 						index2 = j;
 					}
@@ -1341,7 +1477,7 @@ namespace ms
 		ratio = MIN(ratio, 1.);
 
 		double num = MAX(1. - confidence, DBL_MIN);
-		double denom = 1. - pow(1. - ratio, batchSize);
+		double denom = 1. - pow(ratio, batchSize);
 		if (denom < DBL_MIN)
 		{
 			return 0;
@@ -1355,10 +1491,11 @@ namespace ms
 	}
 
 	MSInfoCode fitEllipseRANSAC(
+		const cv::Mat &src,
 		const std::vector<cv::Point> &points,
 		cv::RotatedRect &rRect,
 		float delta,
-		double confidence = 0.995,
+		double confidence = 0.999,
 		int maxIters = 1000,
 		MSFitMethod fitMethod = FIT_ELLIPSE_DIRECT)
 	{
@@ -1366,13 +1503,6 @@ namespace ms
 		if (static_cast<int>(points.size()) < RansacBatch)
 		{
 			return MS_FIT_ELLIPSE_ERROR;
-		}
-
-		// Get index of all points.
-		std::vector<int> indexPoints(points.size());
-		for (int i = 0; i < points.size(); ++i)
-		{
-			indexPoints[i] = i;
 		}
 
 		// Initialize parameters.
@@ -1385,6 +1515,13 @@ namespace ms
 		size_t maxCoNum = 0;
 		std::vector<int> bestIndexes;
 		cv::RotatedRect tempRect;
+
+		// Get index of all points.
+		std::vector<int> indexPoints(points.size());
+		for (int i = 0; i < pointsNum; i++)
+		{
+			indexPoints[i] = i;
+		}
 
 		// Get the best randomly selected points.
 		for (int k = 0; k < numIters; ++k)
@@ -1413,6 +1550,17 @@ namespace ms
 			default:
 				tempRect = cv::fitEllipseDirect(selectPoints); break;
 			}
+			// Show the image
+#ifdef MS_DEBUG
+			cv::Mat showImg = cv::Mat::zeros(src.size(), CV_8UC3);
+			for (size_t i = 0; i < points.size(); i++)
+			{
+				cv::circle(showImg, points[i], 1, cv::Scalar(255, 255, 255), -1);
+			}
+			cv::ellipse(showImg, tempRect, cv::Scalar(0, 255, 0), 1);
+			cv::imshow("RANSAC", showImg);
+			cv::waitKey(0);
+#endif
 			// Compute number of compatible points.
 			std::vector<int> coIndexes;
 			getCompatiblePoints(points, tempRect, coIndexes, delta);
@@ -1422,7 +1570,7 @@ namespace ms
 				bestIndexes = coIndexes;
 				numIters = updateNumIters(
 					confidence,
-					(double)(pointsNum - static_cast<int>(coIndexes.size())) / pointsNum,
+					static_cast<double>(coIndexes.size()) / pointsNum,
 					batchSize,
 					numIters);
 			}
@@ -1701,7 +1849,8 @@ namespace ms
 				showImg.at<cv::Vec3b>(edges[k][e])[2] = (uchar)color[2];
 			}
 		}
-		cv::putText(showImg, "figure 1", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		//cv::putText(showImg, "figure 1: trace", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::imwrite("1_trace.png", showImg);
 		cv::imshow("Trace Edge", showImg);
 		cv::waitKey(0);
 #endif
@@ -1727,7 +1876,8 @@ namespace ms
 				showImg1.at<cv::Vec3b>(cutEdges[k][e])[2] = (uchar)color[2];
 			}
 		}
-		cv::putText(showImg1, "figure 2", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		//cv::putText(showImg1, "figure 2: cut1", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::imwrite("2_cut_1.png", showImg1);
 		cv::imshow("Trace Edge", showImg1);
 		cv::waitKey(0);
 #endif
@@ -1748,7 +1898,8 @@ namespace ms
 				showImg2.at<cv::Vec3b>(linkEdges[k][e])[2] = (uchar)color[2];
 			}
 		}
-		cv::putText(showImg2, "figure 2", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		//cv::putText(showImg2, "figure 3: link1", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::imwrite("3_link_1.png", showImg2);
 		cv::imshow("Trace Edge", showImg2);
 		cv::waitKey(0);
 #endif
@@ -1779,7 +1930,8 @@ namespace ms
 				showImg3.at<cv::Vec3b>(linkEdges[k][e])[2] = (uchar)color[2];
 			}
 		}
-		cv::putText(showImg3, "figure 3", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		//cv::putText(showImg3, "figure 4: remove1", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::imwrite("4_remove_1.png", showImg3);
 		cv::imshow("Trace Edge", showImg3);
 		cv::waitKey(0);
 #endif
@@ -1805,7 +1957,8 @@ namespace ms
 				showImg4.at<cv::Vec3b>(arcs[k][e])[2] = (uchar)color[2];
 			}
 		}
-		cv::putText(showImg4, "figure 4", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		//cv::putText(showImg4, "figure 5: cut2", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::imwrite("5_cut_2.png", showImg4);
 		cv::imshow("Trace Edge", showImg4);
 		cv::waitKey(0);
 #endif
@@ -1826,7 +1979,8 @@ namespace ms
 				showImg5.at<cv::Vec3b>(linkArcs[k][e])[2] = (uchar)color[2];
 			}
 		}
-		cv::putText(showImg5, "figure 5", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		//cv::putText(showImg5, "figure 6: link2", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::imwrite("6_link_2.png", showImg5);
 		cv::imshow("Trace Edge", showImg5);
 		cv::waitKey(0);
 #endif
@@ -1836,6 +1990,10 @@ namespace ms
 		while (itr2 != linkArcs.end())
 		{
 			if (static_cast<int>(itr2->size()) < curveSize)
+			{
+				itr2 = linkArcs.erase(itr2);
+			}
+			else if (!isElliptic(*itr2, segNum, 2.5))
 			{
 				itr2 = linkArcs.erase(itr2);
 			}
@@ -1857,7 +2015,8 @@ namespace ms
 				showImg6.at<cv::Vec3b>(linkArcs[k][e])[2] = (uchar)color[2];
 			}
 		}
-		cv::putText(showImg6, "figure 6", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		//cv::putText(showImg6, "figure 7: remove2", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::imwrite("7_remove_2.png", showImg6);
 		cv::imshow("Trace Edge", showImg6);
 		cv::waitKey(0);
 #endif
@@ -1883,7 +2042,8 @@ namespace ms
 				showImg7.at<cv::Vec3b>(contours[k][e])[2] = (uchar)color[2];
 			}
 		}
-		cv::putText(showImg7, "figure 7", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		//cv::putText(showImg7, "figure 8: group", cv::Point(12, 12), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::imwrite("8_group.png", showImg7);
 		cv::imshow("Trace Edge", showImg7);
 		cv::waitKey(0);
 #endif
@@ -1912,7 +2072,7 @@ namespace ms
 				case FIT_ELLIPSE_AMS:
 					tempRect = cv::fitEllipseAMS(contours[bestIndex]); break;
 				case FIT_ELLIPSE_RANSAC:
-					fitEllipseRANSAC(contours[bestIndex], tempRect, delta); break;
+					fitEllipseRANSAC(src, contours[bestIndex], tempRect, delta); break;
 				case FIT_ELLIPSE_DIRECT:
 				default:
 					tempRect = cv::fitEllipseDirect(contours[bestIndex]); break;
@@ -1954,9 +2114,11 @@ namespace ms
 		int curveNum = 2,
 		int layerNum = 4,
 		int kernelSize = 5,
+		double fGamma = 0.75,
 		double fBilateral = 1.0,
 		int segNum = 10,
 		float distThreshold = 2.f,
+		int channelsFlag = MS_GREEN | MS_RED,
 		MSFitMethod fitMethod = FIT_ELLIPSE_DIRECT)
 	{
 		// Check parameters
@@ -1968,18 +2130,26 @@ namespace ms
 		// Generate images of all layers
 		std::vector<cv::Mat> G(layerNum);
 		G[0] = src;
+#ifdef MS_DEBUG
+		cv::imwrite("G_0.png", G[0]);
+#endif
 		for (int l = 0; l < layerNum - 1; l++)
 		{
 			cv::pyrDown(G[l], G[l + 1], cv::Size(G[l].cols / 2, G[l].rows / 2));
+#ifdef MS_DEBUG
+			cv::imwrite("G_" + std::to_string(l + 1) + ".png", G[l + 1]);
+#endif
 		}
 		
 		// Parameters for image process
 		double ffB = 2.0;
+		double fCanny = 1.0;
+		double ffC = 2.0;
 
 		// Detect ellipses in bottom layer
 		MSInfoCode status;
 		cv::Mat btmEdge;
-		status = preprocess(G[layerNum - 1], btmEdge, kernelSize, fBilateral, MS_BLUE | MS_RED);
+		status = preprocess(G[layerNum - 1], btmEdge, kernelSize, fGamma, fBilateral, fCanny, channelsFlag);
 		if (status != MS_SUCCESS)
 		{
 			return status;
@@ -2005,13 +2175,12 @@ namespace ms
 
 #ifdef MS_DEBUG
 		cv::Mat testImg;
-		cv::imshow("TEST", btmEdge);
-		cv::waitKey(0);
 		cv::cvtColor(btmEdge, testImg, cv::COLOR_GRAY2BGR);
 		for (int k = 0; k < curveNum; k++)
 		{
 			cv::ellipse(testImg, btmrRects[k], cv::Scalar(0, k * 127, 255), 1, 8);
 		}
+		cv::imwrite("btmEdge.png", testImg);
 		cv::imshow("TEST", testImg);
 		cv::waitKey(0);
 #endif
@@ -2059,10 +2228,9 @@ namespace ms
 		roiG[layerNum - 1] = G[layerNum - 1](rectG[layerNum - 1]);
 		roiEdges[layerNum - 1] = btmEdge(rectG[layerNum - 1]);
 		
-
 		// Grab points of ellipses in each layer
 		float rangeThreshold = 2 * sqrt(1 / (btmMaxH * btmMaxH) + 1 / (btmMaxW * btmMaxW)) * distThreshold;
-		float fRange = 3.0;
+		float fRange = 2.0;
 		std::vector<cv::RotatedRect> temprRects(curveNum);
 		for (size_t k = 0; k < curveNum; k++)
 		{
@@ -2082,7 +2250,8 @@ namespace ms
 				rectG[l].height = rectG[l + 1].height * 2;
 				roiG[l] = G[l](rectG[l]);
 				fBilateral *= ffB;
-				status = preprocess(roiG[l], roiEdges[l], kernelSize, fBilateral, MS_BLUE | MS_RED);
+				fCanny *= ffC;
+				status = preprocess(roiG[l], roiEdges[l], kernelSize, fGamma, fBilateral, fCanny, MS_BLUE | MS_GREEN | MS_RED);
 				if (status != MS_SUCCESS)
 				{
 					return status;
@@ -2107,7 +2276,7 @@ namespace ms
 				getCompatiblePoints(tempImg, temprRects[k], curves[k], rangeThreshold);
 				if (static_cast<int>(curves[k].size()) > RansacBatch)
 				{
-					cv::RotatedRect rRect = cv::fitEllipseAMS(curves[k]);
+					cv::RotatedRect rRect = cv::fitEllipseDirect(curves[k]);
 					temprRects[k] = rRect;
 				}
 				else
@@ -2116,11 +2285,14 @@ namespace ms
 				}
 			}
 #ifdef MS_DEBUG
-			cv::Mat drawImg = roiG[l].clone();
+			//cv::Mat drawImg = roiG[l].clone();
+			cv::Mat drawImg;
+			cv::cvtColor(roiEdges[l], drawImg, cv::COLOR_GRAY2BGR);
 			for (size_t k = 0; k < temprRects.size(); k++)
 			{
 				cv::ellipse(drawImg, temprRects[k], cv::Scalar(0, 255, 0), 1, 8);
 			}
+			cv::imwrite("Edge_" + std::to_string(l) + ".png", drawImg);
 			cv::imshow("TEST", drawImg);
 			cv::waitKey(0);
 #endif
@@ -2507,7 +2679,7 @@ namespace ms
 		cv::Mat nw = (cv::Mat_<double>(3, 1) << 0, 0, 1.0);
 		cv::Mat n1 = R1[0] * nw;
 		cv::Mat n2 = R1[1] * nw;
-		double n1n2 = n1.dot(n2);
+		double n1n2 = abs(n1.dot(n2));
 		verticality = acos(n1n2);
 
 		// Compute deep of the hole
@@ -2533,8 +2705,8 @@ namespace ms
 		for (size_t i = 0; i < rRects.size(); i++)
 		{
 			rect = rRects[i];
-			double cosA = cos(rect.angle / 180 * CV_PI);
-			double sinA = sin(rect.angle / 180 * CV_PI);
+			double cosA = cos(rect.angle * CV_PI / 180);
+			double sinA = sin(rect.angle * CV_PI / 180);
 			double a = rect.size.height / 2;
 			double b = rect.size.width / 2;
 			double c2A = cosA * cosA;
@@ -2592,11 +2764,14 @@ namespace ms
 		Hs[1] = Q[0] - tempR1r1s[1] * tempR1r1s[1].t() * Q[0];
 		cv::eigenNonSymmetric(Hs[0], eigenvaluesHs[0], eigenvectorsHs[0]);
 		cv::eigenNonSymmetric(Hs[1], eigenvaluesHs[1], eigenvectorsHs[1]);
-		std::vector<double> diffEigenValues(2);
-		diffEigenValues[0] = eigenvaluesHs[0].at<double>(0) - eigenvaluesHs[0].at<double>(1);
-		diffEigenValues[1] = eigenvaluesHs[1].at<double>(0) - eigenvaluesHs[1].at<double>(1);
+
+		/*std::vector<double> diffMagVectors(2);
+		diffMagVectors[0] = abs(eigenvectorsHs[0].row(0).dot(eigenvectorsHs[0].row(0))
+			+ eigenvectorsHs[0].row(1).dot(eigenvectorsHs[0].row(1)) - 2.0);
+		diffMagVectors[1] = abs(eigenvectorsHs[1].row(0).dot(eigenvectorsHs[1].row(0))
+			+ eigenvectorsHs[1].row(1).dot(eigenvectorsHs[1].row(1)) - 2.0);
 		cv::Mat eigenvectorH;
-		if (diffEigenValues[0] < diffEigenValues[1])
+		if (diffMagVectors[0] < diffMagVectors[1])
 		{
 			R1s[0] = eigenvectorsHs[0].row(0).t();
 			R1s[1] = eigenvectorsHs[0].row(1).t();
@@ -2607,6 +2782,29 @@ namespace ms
 		{
 			R1s[0] = eigenvectorsHs[1].row(0).t();
 			R1s[1] = eigenvectorsHs[1].row(1).t();
+			R1s[2] = tempR1r1s[1];
+			eigenvectorH = eigenvaluesHs[1];
+		}*/
+
+		std::vector<double> diffEigenValues(2);
+		diffEigenValues[0] = abs(eigenvaluesHs[0].at<double>(0) - eigenvaluesHs[0].at<double>(1));
+		diffEigenValues[1] = abs(eigenvaluesHs[1].at<double>(0) - eigenvaluesHs[1].at<double>(1));
+		cv::Mat eigenvectorH;
+		if (diffEigenValues[0] < diffEigenValues[1])
+		{
+			R1s[0] = eigenvectorsHs[0].row(0).t();
+			R1s[1] = eigenvectorsHs[0].row(1).t();
+			//cv::normalize(eigenvectorsHs[0].row(0).t(), R1s[0], 1, 0, cv::NORM_L2);
+			//cv::normalize(eigenvectorsHs[0].row(1).t(), R1s[1], 1, 0, cv::NORM_L2);
+			R1s[2] = tempR1r1s[0];
+			eigenvectorH = eigenvaluesHs[0];
+		}
+		else
+		{
+			R1s[0] = eigenvectorsHs[1].row(0).t();
+			R1s[1] = eigenvectorsHs[1].row(1).t();
+			//cv::normalize(eigenvectorsHs[1].row(0).t(), R1s[0], 1, 0, cv::NORM_L2);
+			//cv::normalize(eigenvectorsHs[1].row(1).t(), R1s[1], 1, 0, cv::NORM_L2);
 			R1s[2] = tempR1r1s[1];
 			eigenvectorH = eigenvaluesHs[1];
 		}
@@ -2632,18 +2830,32 @@ namespace ms
 		A.row(3) = R2.col(1).t() * Q[1] * R;
 		cv::Mat beta_2 = -R2.col(0).t() * Q[1] * t;
 		cv::Mat beta_3 = -R2.col(1).t() * Q[1] * t;
+		/*A.row(0) = R2.col(0).t() * Q[1];
+		A.row(1) = R2.col(1).t() * Q[1];
+		A.row(2) = R1s[0].t() * Q[0] * R.t();
+		A.row(3) = R1s[1].t() * Q[0] * R.t();
+		cv::Mat beta_2 = R1s[0].t() * Q[0] * R.t() * t;
+		cv::Mat beta_3 = R1s[1].t() * Q[0] * R.t() * t;*/
 		cv::Mat beta = (cv::Mat_<double>(4, 1) << 0, 0, beta_2.at<double>(0), beta_3.at<double>(0));
 		t1 = (A.t() * A).inv() * A.t() * beta;
 		cv::Mat t2 = R * t1 + t;
-		cv::Mat temp = -t1.t() * Q[0] * t1;
-		double k1 = temp.at<double>(0);
+		cv::Mat temp1 = -t1.t() * Q[0] * t1;
+		cv::Mat temp2 = -t2.t() * Q[1] * t2;
+		//std::cout << temp1 << std::endl;
+		//std::cout << temp2 << std::endl;
+		double k1 = temp1.at<double>(0);	//(temp1.at<double>(0) + temp2.at<double>(0)) / 2;
 		double k2 = k1 / k;
-		/*temp = R1s[0].t() * Q[0] * R1s[0];
-		double a = sqrt(k1 / temp.at<double>(0));*/
 		double a = sqrt(k1 / eigenvectorH.at<double>(0));
-		/*temp = R1s[1].t() * Q[0] * R1s[1];
-		double b = sqrt(k1 / temp.at<double>(0));*/
 		double b = sqrt(k1 / eigenvectorH.at<double>(1));
+		/*cv::Mat temp;
+		temp = R1s[0].t() * Q[0] * R1s[0];
+		double a = sqrt(k1 / temp.at<double>(0));
+		temp = R1s[1].t() * Q[0] * R1s[1];
+		double b = sqrt(k1 / temp.at<double>(0));*/
+#ifdef MS_DEBUG
+		std::cout << k << std::endl;
+		std::cout << a << ", " << b << std::endl;
+#endif
 		d = a + b;
 		xyz[0] = cv::Point3d(t1.at<double>(0), t1.at<double>(1), t1.at<double>(2));
 		xyz[1] = cv::Point3d(t2.at<double>(0), t2.at<double>(1), t2.at<double>(2));

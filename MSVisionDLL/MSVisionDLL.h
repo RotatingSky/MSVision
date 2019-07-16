@@ -57,6 +57,7 @@ namespace ms
 	 *		MSInfoCode	- state of the code
 	 */
 	EXPORT_API MSInfoCode fitEllipseRANSAC(
+		const cv::Mat &src,
 		const std::vector<cv::Point> &points,
 		cv::RotatedRect &rRect,
 		float delta,
@@ -176,9 +177,11 @@ namespace ms
 		int curveNum,
 		int layerNum,
 		int kernelSize,
+		double fGamma,
 		double fBilateral,
 		int segNum,
 		float distThreshold,
+		int channelsFlag,
 		MSFitMethod MSFitMethod);
 
 	/**

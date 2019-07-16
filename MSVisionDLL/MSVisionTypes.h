@@ -13,6 +13,7 @@ namespace ms
 {
 	// Constant variables
 	const int CamsNum = 2;
+	const int LightNum = 4;
 	const int RansacBatch = 5;
 
 	// An enum type for error or exceptions process
@@ -70,5 +71,13 @@ namespace ms
 	{
 		LIGHT_ON = 1,
 		LIGHT_OFF = 0
+	};
+
+	struct MSParamsLM
+	{
+		cv::Mat Q0;
+		cv::Mat Q1;
+		cv::Mat R;
+		cv::Mat t;
 	};
 } // namespace ms

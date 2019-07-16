@@ -23,7 +23,6 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 	mvInitLibFlag(false),
 	linkedFlag(false),
 	lightConnectFlag(false),
-	lightFlag(false),
 	loadFlag(false),
 	sharpFlag(true),
 	restoreFlag(false),
@@ -31,9 +30,10 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 	lightChannel(ms::LIGHT_CHANNEL1),
 	mvHoleType(CountersinkHole),
 	mvMeasureType(Reconstruction),
-	fitMethod(ms::FIT_ELLIPSE_DIRECT),
+	fitMethod(ms::FIT_ELLIPSE_RANSAC),
 	scope(0.75f),
 	kernelSize(5),
+	fGamma(0.75),
 	fBilateral(1.0),
 	pointsNum(53),
 	bitAngle(100.0)
@@ -73,6 +73,10 @@ MSVisionQt::MSVisionQt(QWidget *parent)
 	{
 		mvCamHandles[i] = NULL;
 		mvProperties[i] = NULL;
+	}
+	for (int i = 0; i < ms::LightNum; i++)
+	{
+		lightFlags[i] = false;
 	}
 
 	// Initialize cameras
@@ -114,7 +118,10 @@ MSVisionQt::~MSVisionQt()
 	// Stopping cameras
 	on_stopCam();
 	// Turn off light
-	api_LE_SetCONSTOnOff(lightChannel, ms::LIGHT_OFF);
+	for (int i = 0; i < ms::LightNum; i++)
+	{
+		api_LE_SetCONSTOnOff(i + 1, ms::LIGHT_OFF);
+	}
 	// Release MV library
 	MVTerminateLib();
 }
@@ -212,6 +219,24 @@ void MSVisionQt::drawImgs(int index)
 		labelImgL.setPixmap(QPixmap::fromImage(showImgs[0]));
 		showImgs[1] = showQtImgs[1].scaled(wImg, hImg, Qt::KeepAspectRatio);
 		labelImgR.setPixmap(QPixmap::fromImage(showImgs[1]));
+	}
+}
+
+void MSVisionQt::saveImgs(int index)
+{
+	if (saveImgPath == "")
+	{
+		saveImgPath = QFileDialog::getExistingDirectory(
+			this,
+			tr(u8"选择图片保存路径"),
+			"./");
+	}
+	QDateTime time = QDateTime::currentDateTime();
+	QString timeStr = time.toString("yyyyMMdd-hhmmss");
+	if (!saveImgPath.isNull())
+	{
+		QString filePath = QString("%1/%2_").arg(saveImgPath).arg(timeStr);
+		qtImgs[index].save(filePath + QString::number(index) + ".BMP");
 	}
 }
 
@@ -321,7 +346,18 @@ ms::MSInfoCode MSVisionQt::detectImg(int index)
 	// Grab ellipses from image and draw
 	ms::MSInfoCode status;
 	int flag = -1;
-	status = ms::pyrEllipse(tempImg, rRects[index], rRectsNum, 4, kernelSize, fBilateral, 10, 2.f, fitMethod);
+	status = ms::pyrEllipse(
+		tempImg,
+		rRects[index],
+		rRectsNum,
+		4,
+		kernelSize,
+		fGamma,
+		fBilateral,
+		10,
+		2.f,
+		ms::MS_BLUE | ms::MS_GREEN | ms::MS_RED,
+		fitMethod);
 	if (status != ms::MS_SUCCESS)
 	{
 		return status;
@@ -406,8 +442,8 @@ void MSVisionQt::measure()
 			QString::number(xyzs[1][1].x, 10, 3) + "," +
 			QString::number(xyzs[1][1].y, 10, 3) + "," +
 			QString::number(xyzs[1][1].z, 10, 3) + "]";
-		QString strOuterD = QString::number(diameters[0]-0.0237, 10, 3);
-		QString strInnerD = QString::number(diameters[1]+0.0048, 10, 3);
+		QString strOuterD = QString::number(diameters[0] + 0.0783, 10, 3);	//0.0783	//0.0885
+		QString strInnerD = QString::number(diameters[1] + 0.0446, 10, 3);	//0.0459	//0.0389
 		QString strDelta = QString::number(delta, 10, 3);
 		QString strDeep = QString::number(deep, 10, 3);
 		ui.centerOuterC1->setText(xyzStrOuterC1);
@@ -467,7 +503,7 @@ void MSVisionQt::measure()
 			QString::number(xyzs[1].x, 10, 3) + "," +
 			QString::number(xyzs[1].y, 10, 3) + "," +
 			QString::number(xyzs[1].z, 10, 3) + "]";
-		QString strD = QString::number(diameter, 10, 3);
+		QString strD = QString::number(diameter + 0.0446, 10, 3);	//0.0389
 		ui.centerInnerC1->setText(xyzStrC1);
 		ui.centerInnerC2->setText(xyzStrC2);
 		ui.innerDiameter->setText(strD);
@@ -697,9 +733,11 @@ void MSVisionQt::on_connect()
 			WARNMSG("Please check the link of light");
 			return;
 		}
-		errCode = api_LE_SetCHMode(lightChannel, ms::LIGHT_CONSTANT);
 		lightConnectFlag = true;
-		lightFlag = true;
+		for (int i = 0; i < ms::LightNum; i++)
+		{
+			api_LE_SetCONSTOnOff(i + 1, ms::LIGHT_ON);
+		}
 		ui.comboBoxConnect->setDisabled(true);
 		ui.comboBoxChannel->setDisabled(true);
 		ui.connectLightBtn->setText(u8"断开");
@@ -752,15 +790,15 @@ void MSVisionQt::on_indensity()
 void MSVisionQt::on_lightOnOff()
 {
 	byte errCode;
-	if (!lightFlag)
+	if (!lightFlags[lightChannel-1])
 	{
 		errCode = api_LE_SetCONSTOnOff(lightChannel, ms::LIGHT_ON);
-		lightFlag = true;
+		lightFlags[lightChannel-1] = true;
 	}
 	else
 	{
 		errCode = api_LE_SetCONSTOnOff(lightChannel, ms::LIGHT_OFF);
-		lightFlag = false;
+		lightFlags[lightChannel-1] = false;
 	}
 }
 
@@ -799,6 +837,11 @@ void MSVisionQt::on_holeType(int index)
 void MSVisionQt::on_kernelSize()
 {
 	kernelSize = ui.spinKernelSize->value();
+}
+
+void MSVisionQt::on_gamma()
+{
+	fGamma = ui.doubleSpinGamma->value();
 }
 
 void MSVisionQt::on_bilateral()
@@ -862,14 +905,41 @@ void MSVisionQt::on_detect()
 	ui.detectBtn->setDisabled(true);
 	ui.statusBar->showMessage(u8"正在检测...");
 	cv::waitKey(1);
-	for (int i = 0; i < ms::CamsNum; i++)
+	/*for (int i = 0; i < ms::CamsNum; i++)
 	{
 		MVSetTriggerMode(mvCamHandles[i], TriggerMode_On);
-	}
+	}*/
+
+	//// Link the lights
+	//if (!lightConnectFlag)
+	//{
+	//	api_LE_USBConnect();
+	//	lightConnectFlag = true;
+	//}
+
 	sTime = (double)cv::getTickCount();
 	ms::MSInfoCode status;
 	for (int i = 0; i < ms::CamsNum; i++)
 	{
+		// Turn on and off the lights
+		if (0 == i)
+		{
+			api_LE_SetConstInt(static_cast<byte>(i + 1), 50);
+			api_LE_SetConstInt(static_cast<byte>(i + 3), 5);
+			/*api_LE_SetCONSTOnOff(static_cast<byte>(i + 1), ms::LIGHT_ON);
+			cv::waitKey(100);
+			api_LE_SetCONSTOnOff(static_cast<byte>(i + 3), ms::LIGHT_OFF);*/
+		}
+		if (1 == i)
+		{
+			api_LE_SetConstInt(static_cast<byte>(i), 5);
+			api_LE_SetConstInt(static_cast<byte>(i + 2), 50);
+			/*api_LE_SetCONSTOnOff(static_cast<byte>(i), ms::LIGHT_OFF);
+			cv::waitKey(100);
+			api_LE_SetCONSTOnOff(static_cast<byte>(i + 2), ms::LIGHT_ON);*/
+		}
+		cv::waitKey(800);
+		// Detection
 		status = detectImg(i);
 		if (status != ms::MS_SUCCESS)
 		{
@@ -889,22 +959,24 @@ void MSVisionQt::on_detect()
 			ui.detectBtn->setEnabled(true);
 			return;
 		}
+		saveImgs(i);
 	}
+	cv::destroyAllWindows();
 	// Show result
 	showFlag = false;
 	drawImgs(-1);
 	measure();
-	double eTime = ((double)cv::getTickCount() - sTime) / cv::getTickFrequency();
-	// Save the images
-	on_saveImg();
+	double eTime = ((double)cv::getTickCount() - sTime) / cv::getTickFrequency() - 0.2;
+	//// Save the images
+	//on_saveImg();
 	QString strTime = QString::number(eTime, 10, 3);
 	ui.timeUsed->setText(strTime);
 	ui.statusBar->showMessage(u8"检测成功", 2000);
 	cv::waitKey(2000);
 	showFlag = true;
-	for (int i = 0; i < ms::CamsNum; i++)
+	/*for (int i = 0; i < ms::CamsNum; i++)
 	{
 		MVSetTriggerMode(mvCamHandles[i], TriggerMode_Off);
-	}
+	}*/
 	ui.detectBtn->setEnabled(true);
 }

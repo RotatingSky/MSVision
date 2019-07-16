@@ -72,6 +72,7 @@ public slots:
 	void on_loadData();
 	void on_holeType(int);
 	void on_kernelSize();
+	void on_gamma();
 	void on_bilateral();
 	void on_fitMethod(int);
 	void on_measureType(int);
@@ -82,6 +83,7 @@ public slots:
 protected:
 	void initCam();
 	void drawImgs(int);
+	void saveImgs(int);
 	cv::Mat qImage2cvMat(const QImage &qtImg);
 	QImage cvMat2qImage(const cv::Mat &matImg);
 	ms::MSInfoCode detectImg(int);
@@ -107,11 +109,11 @@ private:
 	bool mvInitLibFlag;
 	bool linkedFlag;
 	bool lightConnectFlag;
-	bool lightFlag;
 	bool loadFlag;
 	bool sharpFlag;
 	bool restoreFlag;
 	bool showFlag;
+	bool lightFlags[ms::LightNum];
 	byte lightChannel;
 	QButtonGroup *channelBtns;
 	QButtonGroup *holeTypeRadBtns;
@@ -127,6 +129,7 @@ private:
 	std::vector<cv::RotatedRect> rRects[ms::CamsNum];
 	float scope;
 	int kernelSize;
+	double fGamma;
 	double fBilateral;
 	int pointsNum;
 	double bitAngle;

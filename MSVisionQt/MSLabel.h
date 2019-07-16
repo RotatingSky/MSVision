@@ -8,6 +8,7 @@
 #pragma once
 
 #include <QLabel>
+#include <QPainter>
 #include <QPaintEvent>
 
 class MSLabel : public QLabel
