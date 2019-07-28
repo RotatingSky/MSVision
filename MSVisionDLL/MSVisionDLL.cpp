@@ -1046,7 +1046,15 @@ namespace ms
 			{
 				signFlag = true;
 			}
-			sign = curvature > 0 ? 1 : -1;
+			//sign = curvature >= 0 ? 1 : -1;
+			if (curvature > 0)
+			{
+				sign = 1;
+			}
+			else if (curvature < 0)
+			{
+				sign = -1;
+			}
 
 			// Curvature conditions
 			if (abs(curvature) > curvThreshold)
@@ -1076,6 +1084,7 @@ namespace ms
 				tempCurves[index].insert(tempCurves[index].end(), curve.begin() + lastIndex, curve.begin() + maxDistIndex);
 				lastIndex = maxDistIndex;
 				curIndex = lastIndex + segNum;
+				index = 1 - index;
 			}
 			else if (signFlag)
 			{
@@ -2157,7 +2166,7 @@ namespace ms
 		std::vector<cv::RotatedRect> btmrRects;
 		float delta = 16.f * distThreshold / (btmEdge.cols + btmEdge.rows);
 		int curveSize = 25;
-		double angleThreshold = 30.0;
+		double angleThreshold = 25.0;
 		status = grabEllipse(
 			btmEdge,
 			btmrRects,
@@ -2789,7 +2798,7 @@ namespace ms
 		std::vector<double> diffEigenValues(2);
 		diffEigenValues[0] = abs(eigenvaluesHs[0].at<double>(0) - eigenvaluesHs[0].at<double>(1));
 		diffEigenValues[1] = abs(eigenvaluesHs[1].at<double>(0) - eigenvaluesHs[1].at<double>(1));
-		cv::Mat eigenvectorH;
+		cv::Mat eigenvaluesH;
 		if (diffEigenValues[0] < diffEigenValues[1])
 		{
 			R1s[0] = eigenvectorsHs[0].row(0).t();
@@ -2797,7 +2806,7 @@ namespace ms
 			//cv::normalize(eigenvectorsHs[0].row(0).t(), R1s[0], 1, 0, cv::NORM_L2);
 			//cv::normalize(eigenvectorsHs[0].row(1).t(), R1s[1], 1, 0, cv::NORM_L2);
 			R1s[2] = tempR1r1s[0];
-			eigenvectorH = eigenvaluesHs[0];
+			eigenvaluesH = eigenvaluesHs[0];
 		}
 		else
 		{
@@ -2806,7 +2815,7 @@ namespace ms
 			//cv::normalize(eigenvectorsHs[1].row(0).t(), R1s[0], 1, 0, cv::NORM_L2);
 			//cv::normalize(eigenvectorsHs[1].row(1).t(), R1s[1], 1, 0, cv::NORM_L2);
 			R1s[2] = tempR1r1s[1];
-			eigenvectorH = eigenvaluesHs[1];
+			eigenvaluesH = eigenvaluesHs[1];
 		}
 
 		// Obtain R2 by R2 = R * R1
@@ -2845,8 +2854,18 @@ namespace ms
 		//std::cout << temp2 << std::endl;
 		double k1 = temp1.at<double>(0);	//(temp1.at<double>(0) + temp2.at<double>(0)) / 2;
 		double k2 = k1 / k;
-		double a = sqrt(k1 / eigenvectorH.at<double>(0));
-		double b = sqrt(k1 / eigenvectorH.at<double>(1));
+		double a = sqrt(k1 / eigenvaluesH.at<double>(0));
+		double b = sqrt(k1 / eigenvaluesH.at<double>(1));
+		/*cv::Mat r11tB1r11 = R1.col(0).t() * Q[0] * R1.col(0);
+		cv::Mat r12tB1r12 = R1.col(1).t() * Q[0] * R1.col(1);
+		double a = sqrt(k1 / r11tB1r11.at<double>(0));
+		double b = sqrt(k1 / r12tB1r12.at<double>(0));*/
+		/*cv::Mat r11tB1r11 = R1.col(0).t() * Q[0] * R1.col(0);
+		cv::Mat r12tB1r12 = R1.col(1).t() * Q[0] * R1.col(1);
+		cv::Mat r21tB2r21 = R2.col(0).t() * Q[1] * R2.col(0);
+		cv::Mat r22tB2r22 = R2.col(1).t() * Q[1] * R2.col(1);
+		double a = (sqrt(k1 / r11tB1r11.at<double>(0)) + sqrt(k2 / r21tB2r21.at<double>(0))) / 2;
+		double b = (sqrt(k1 / r12tB1r12.at<double>(0)) + sqrt(k2 / r22tB2r22.at<double>(0))) / 2;*/
 		/*cv::Mat temp;
 		temp = R1s[0].t() * Q[0] * R1s[0];
 		double a = sqrt(k1 / temp.at<double>(0));
@@ -2854,7 +2873,17 @@ namespace ms
 		double b = sqrt(k1 / temp.at<double>(0));*/
 #ifdef MS_DEBUG
 		std::cout << k << std::endl;
+		std::cout << k1 << ": " << k2 << std::endl;
 		std::cout << a << ", " << b << std::endl;
+		std::cout << t1 << std::endl;
+		std::cout << t2 << std::endl;
+		/*std::cout << r11tB1r11 << std::endl;
+		std::cout << r12tB1r12 << std::endl;
+		std::cout << r21tB2r21 << std::endl;
+		std::cout << r22tB2r22 << std::endl;*/
+		/*std::cout << r11tB1r11 << std::endl;
+		std::cout << r12tB1r12 << std::endl;
+		std::cout << eigenvaluesH << std::endl;*/
 #endif
 		d = a + b;
 		xyz[0] = cv::Point3d(t1.at<double>(0), t1.at<double>(1), t1.at<double>(2));
